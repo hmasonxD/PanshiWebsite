@@ -1,5 +1,5 @@
 import React from 'react';
-import {Popover, List, ListItemText, ListItemButton} from '@mui/material';
+import { Popover, List, ListItemText, ListItemButton } from '@mui/material';
 
 interface LanguagePopupProps {
     anchorEl: HTMLElement | null;
@@ -31,8 +31,8 @@ const LanguagePopup: React.FC<LanguagePopupProps> = ({ anchorEl, onClose }) => {
                 <ListItemButton onClick={() => handleLanguageSelect('English')}>
                     <ListItemText primary="English" />
                 </ListItemButton>
-                <ListItemButton onClick={() => handleLanguageSelect('Spanish')}>
-                    <ListItemText primary="Spanish" />
+                <ListItemButton onClick={() => handleLanguageSelect('French')}>
+                    <ListItemText primary="French" />
                 </ListItemButton>
                 {/* Add more languages as needed */}
             </List>

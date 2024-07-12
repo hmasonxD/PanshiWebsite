@@ -11,8 +11,9 @@ import About from './pages/About';
 import Support from './pages/Support';
 import Download from './pages/Download';
 import Login from './pages/Login';
+import PageTransition from './PageTransition';
 
-const App = () => {
+const App: React.FC = () => {
     const [darkMode, setDarkMode] = useState(true);
 
     const toggleDarkMode = () => {
@@ -24,22 +25,24 @@ const App = () => {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-                <Router>
-                    <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-                    <Box sx={{ flex: 1 }}>
-                        <Routes>
-                            <Route path="/" element={<MatchSection />} />
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/about" element={<About />} />
-                            <Route path="/product" element={<Product />} />
-                            <Route path="/support" element={<Support />} />
-                            <Route path="/download" element={<Download />} />
-                        </Routes>
+            <Router>
+                <PageTransition>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                        <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+                        <Box sx={{ flex: 1 }}>
+                            <Routes>
+                                <Route path="/" element={<MatchSection />} />
+                                <Route path="/login" element={<Login />} />
+                                <Route path="/about" element={<About />} />
+                                <Route path="/product" element={<Product />} />
+                                <Route path="/support" element={<Support />} />
+                                <Route path="/download" element={<Download />} />
+                            </Routes>
+                        </Box>
+                        <Footer />
                     </Box>
-                </Router>
-                <Footer />
-            </Box>
+                </PageTransition>
+            </Router>
         </ThemeProvider>
     );
 };

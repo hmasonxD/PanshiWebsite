@@ -20,7 +20,7 @@ import logoDark from '../assets/logodark.png';
 import logoLight from '../assets/logolight.png';
 import { useNavigate } from 'react-router-dom';
 import { lightTheme, darkTheme } from '../theme';
-import LanguagePopup from './LanguagePopup'; // Import LanguagePopup component
+import LanguagePopup from './LanguagePopup';
 
 type CustomTheme = typeof lightTheme;
 
