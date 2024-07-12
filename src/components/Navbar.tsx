@@ -21,13 +21,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import logoDark from '../assets/logodark.png';
 import logoLight from '../assets/logolight.png';
 import { useNavigate } from 'react-router-dom';
-
 import { lightTheme, darkTheme } from '../theme';
 
 type CustomTheme = typeof lightTheme;
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
-    height: '115px',
+    height: '75px',
     backgroundColor: (theme as CustomTheme).customPalette.navbarBackground,
     boxShadow: 'none',
 }));
@@ -45,17 +44,17 @@ const NavButton = styled(Button)(({ theme }) => ({
     color: theme.palette.mode === 'dark' ? '#ffffff' : '#F53391',
     textTransform: 'none',
     fontWeight: 'normal',
-    fontSize: '18px',
-    padding: '8px 12px',
+    fontSize: '20px',
+    padding: '8px 32px',
 }));
 
 const LoginButton = styled(Button)(({ theme }) => ({
     backgroundColor: theme.palette.primary.main,
-    color: '#ffffff',
+    color: '#F3EFF4',
     textTransform: 'none',
     fontWeight: 'bold',
-    fontSize: '24px',
-    padding: '12px 24px',
+    fontSize: '20px',
+    padding: '8px 32px',
     borderRadius: '20px',
     '&:hover': {
         backgroundColor: '#d62a7a',
@@ -70,7 +69,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const theme = useTheme() as CustomTheme;
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const navigate = useNavigate();
 
     const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -106,7 +105,7 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
                     </ListItem>
                 ))}
             </List>
-            <Box sx={{ display: 'flex', alignItems: 'center', padding: '12px 30px' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', padding: '8px 32px' }}>
                 <Typography variant="body2" sx={{ mr: 1, color: theme.palette.text.primary }}>Dark Mode</Typography>
                 <Switch
                     checked={darkMode}
@@ -119,14 +118,14 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
 
     return (
         <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
-            <StyledAppBar position="static">
+            <StyledAppBar position="sticky">
                 <StyledToolbar>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mr: 20 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mr: 24 }}>
                         {!isMobile && (
                             <>
                                 <NavButton>Language</NavButton>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                                    <Typography variant="body2" sx={{ mr: 2, color: theme.palette.text.primary }}>Dark Mode</Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', padding: '8px 32px' }}>
+                                    <Typography variant="body2" sx={{ fontSize: 20, mr: 1, color: theme.palette.text.primary }}>Dark Mode</Typography>
                                     <Switch
                                         checked={darkMode}
                                         onChange={toggleDarkMode}
@@ -150,11 +149,11 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
                             </IconButton>
                         )}
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 20 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 24 }}>
                         <img
                             src={darkMode ? logoDark : logoLight}
                             alt="Panshi Logo"
-                            style={{ height: '80px', marginRight: '24px', cursor: 'pointer' }}
+                            style={{ height: '60px', marginRight: '32px', cursor: 'pointer' }}
                             onClick={() => navigate('/')}
                         />
                         {!isMobile && navItems.map((item) => (

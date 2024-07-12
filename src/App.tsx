@@ -24,17 +24,19 @@ const App = () => {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Box sx={{ minHeight: '100vh' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                 <Router>
                     <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-                    <Routes>
-                        <Route path="/" element={<MatchSection />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/about" element={<About />} />
-                        <Route path="/product" element={<Product />} />
-                        <Route path="/support" element={<Support />} />
-                        <Route path="/download" element={<Download />} />
-                    </Routes>
+                    <Box sx={{ flex: 1 }}>
+                        <Routes>
+                            <Route path="/" element={<MatchSection />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/about" element={<About />} />
+                            <Route path="/product" element={<Product />} />
+                            <Route path="/support" element={<Support />} />
+                            <Route path="/download" element={<Download />} />
+                        </Routes>
+                    </Box>
                 </Router>
                 <Footer />
             </Box>

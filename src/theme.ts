@@ -40,7 +40,7 @@ const darkTheme = createTheme({
             main: '#F53391', // Pink color for login button
         },
         background: {
-            default: '#333333',
+            default: '#3B0256',
             paper: '#333333',
         },
     },
@@ -57,8 +57,8 @@ const lightTheme = createTheme({
             main: '#F53391', // Pink color for login button
         },
         background: {
-            default: '#ffffff',
-            paper: '#ffffff',
+            default: '#F3EFF4',
+            paper: '#F3EFF4',
         },
         text: {
             primary: '#000000',
