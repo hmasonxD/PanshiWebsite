@@ -1,14 +1,23 @@
 import React from 'react';
-import { Box, Typography, Link, Grid, Button } from '@mui/material';
+import { Box, Typography, Link, Grid, Button, useTheme } from '@mui/material';
 import { YouTube, Instagram, Twitter, Facebook, MusicNote } from '@mui/icons-material';
 
 const Footer = () => {
+    const theme = useTheme();
+
     return (
-        <Box sx={{ bgcolor: '#F9E4A0', p: 4 }} component="footer">
+        <Box
+            sx={{
+                bgcolor: theme.customPalette.navbarBackground,
+                p: 4,
+                color: theme.palette.text.primary,
+            }}
+            component="footer"
+        >
             <Grid container spacing={4}>
                 <Grid item xs={12} sm={3}>
-                    <Typography variant="h6" gutterBottom>
-                        Panshi Dating Website: Find Your Match!
+                    <Typography variant="h4" gutterBottom>
+                        Panshi Dating Website: <br /><br />Find Your Match!
                     </Typography>
                     {/*<Link href="#" color="inherit" display="block">Privacy Policy</Link>*/}
                     {/*<Link href="#" color="inherit" display="block">Terms & Conditions</Link>*/}
@@ -16,13 +25,13 @@ const Footer = () => {
                     {/*<Link href="#" color="inherit" display="block">FAQ</Link>*/}
                 </Grid>
                 <Grid item xs={12} sm={3}>
-                    <Typography variant="h6" gutterBottom>
+                    <Typography variant="h4" gutterBottom>
                         Careers
                     </Typography>
                     <Link href="#" color="inherit" display="block">Careers Portal</Link>
                 </Grid>
                 <Grid item xs={12} sm={3}>
-                    <Typography variant="h6" gutterBottom>
+                    <Typography variant="h4" gutterBottom>
                         Social
                     </Typography>
                     <Box>
