@@ -1,16 +1,20 @@
 import { createTheme } from '@mui/material/styles';
 
-const theme = createTheme({
-    palette: {
-        mode: 'dark',
-        primary: {
-            main: '#F53391', // Pink color for login button
-        },
-        background: {
-            default: '#333333', // Dark background
-            paper: '#333333',
-        },
-    },
+// Define the structure of our custom theme properties
+declare module '@mui/material/styles' {
+    interface Theme {
+        customPalette: {
+            navbarBackground: string;
+        }
+    }
+    interface ThemeOptions {
+        customPalette?: {
+            navbarBackground?: string;
+        }
+    }
+}
+
+const baseTheme = {
     typography: {
         fontFamily: 'Acme, sans-serif',
     },
@@ -26,6 +30,43 @@ const theme = createTheme({
       `,
         },
     },
+};
+
+const darkTheme = createTheme({
+    ...baseTheme,
+    palette: {
+        mode: 'dark',
+        primary: {
+            main: '#F53391', // Pink color for login button
+        },
+        background: {
+            default: '#333333',
+            paper: '#333333',
+        },
+    },
+    customPalette: {
+        navbarBackground: '#333333',
+    },
 });
 
-export default theme;
+const lightTheme = createTheme({
+    ...baseTheme,
+    palette: {
+        mode: 'light',
+        primary: {
+            main: '#F53391', // Pink color for login button
+        },
+        background: {
+            default: '#ffffff',
+            paper: '#ffffff',
+        },
+        text: {
+            primary: '#000000',
+        },
+    },
+    customPalette: {
+        navbarBackground: '#F9E4A0',
+    },
+});
+
+export { darkTheme, lightTheme };
