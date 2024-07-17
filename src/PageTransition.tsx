@@ -10,7 +10,7 @@ const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
     const location = useLocation();
 
     return (
-        <Fade key={location.pathname} in={true} timeout={1000}>
+        <Fade key={location.pathname} in={true} timeout={200}>
             <div>{children}</div>
         </Fade>
     );
