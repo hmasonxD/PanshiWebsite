@@ -30,6 +30,7 @@ const App: React.FC = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
+          <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
           <PageTransition>
             <Box
               sx={{
@@ -38,7 +39,6 @@ const App: React.FC = () => {
                 minHeight: "100vh",
               }}
             >
-              <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
               <Box sx={{ flex: 1 }}>
                 <Routes>
                   <Route path="/" element={<MatchSection />} />
