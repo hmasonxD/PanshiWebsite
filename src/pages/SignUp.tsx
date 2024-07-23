@@ -11,44 +11,46 @@ import {
   InputLabel,
   Checkbox,
   FormControlLabel,
+  useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
-const StyledContainer = styled(Container)({
+const StyledContainer = styled(Container)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
   height: "100vh",
-  backgroundColor: "#3B0256", // Purple background
-  color: "white",
-});
+  backgroundColor: theme.palette.background.default,
+  color: theme.palette.text.primary,
+}));
 
-const StyledBox = styled(Box)({
+const StyledBox = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   padding: "20px",
   borderRadius: "10px",
-  backgroundColor: "rgba(0, 0, 0, 0.2)", // Slightly transparent dark background
-});
+  backgroundColor: theme.palette.background.paper,
+}));
 
-const StyledButton = styled(Button)({
+const StyledButton = styled(Button)(({ theme }) => ({
   margin: "10px",
-  backgroundColor: "#F53391",
-  color: "white",
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
   "&:hover": {
-    backgroundColor: "#45a049",
+    backgroundColor: theme.palette.primary.dark,
   },
-});
+}));
 
-const Signup: React.FC = () => {
+const SignUp: React.FC = () => {
+  const theme = useTheme();
   const [step, setStep] = useState(1);
   const [gender, setGender] = useState("");
   const [showGender, setShowGender] = useState(false);
   const [birthday, setBirthday] = useState({ month: "", day: "", year: "" });
   const [firstName, setFirstName] = useState("");
-  const [locationEnabled, setLocationEnabled] = useState(false);
+  const [locationEnabled, setLocationEnabled] = useState(false); // eslint-disable-line
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
@@ -169,7 +171,10 @@ const Signup: React.FC = () => {
       <StyledButton onClick={() => setLocationEnabled(true)}>
         Set Your Location
       </StyledButton>
-      <Button onClick={handleContinue} style={{ color: "white" }}>
+      <Button
+        onClick={handleContinue}
+        style={{ color: theme.palette.primary.contrastText, margin: "10px" }}
+      >
         Not Now
       </Button>
       <Button
@@ -178,7 +183,7 @@ const Signup: React.FC = () => {
           position: "absolute",
           top: "10px",
           right: "10px",
-          color: "white",
+          color: theme.palette.primary.contrastText,
         }}
       >
         Skip
@@ -189,43 +194,18 @@ const Signup: React.FC = () => {
   const renderWelcomeStep = () => (
     <>
       <Typography variant="h5" gutterBottom>
-        Welcome!
+        Welcome to Panshi!
       </Typography>
       <Typography variant="h6" gutterBottom>
-        How do you want to get started?
+        Rules to follow
       </Typography>
-      <StyledButton
-        onClick={handleContinue}
-        fullWidth
-        startIcon={<span>f</span>}
-      >
-        Continue with Facebook
-      </StyledButton>
-      <StyledButton
-        onClick={handleContinue}
-        fullWidth
-        startIcon={<span>G</span>}
-      >
-        Continue with Google
-      </StyledButton>
-      <Typography variant="h6" gutterBottom>
-        or
+      <Typography variant="body1" gutterBottom>
+        Rule one: Respect others.
       </Typography>
-      <StyledButton
-        onClick={handleContinue}
-        fullWidth
-        startIcon={<span>📞</span>}
-      >
-        Continue with Phone Number
-      </StyledButton>
-      <Button color="secondary" onClick={handleContinue}>
-        Trouble Logging In?
-      </Button>
-      <StyledButton>Continue</StyledButton>
-      <Box mt={2}>
-        <Button size="small">Terms of Service</Button>
-        <Button size="small">Privacy Policy</Button>
-      </Box>
+      <Typography variant="body1" gutterBottom>
+        Rule two: Be honest.
+      </Typography>
+      <StyledButton onClick={handleContinue}>Continue</StyledButton>
     </>
   );
 
@@ -248,7 +228,7 @@ const Signup: React.FC = () => {
           position: "absolute",
           top: "10px",
           right: "10px",
-          color: "white",
+          color: theme.palette.primary.contrastText,
         }}
       >
         Not Now
@@ -317,4 +297,4 @@ const Signup: React.FC = () => {
   );
 };
 
-export default Signup;
+export default SignUp;

@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { TextField, Button, Typography, Container, Fade } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Container,
+  Fade,
+  useTheme,
+} from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import logoDark from "../assets/logodark.png";
+import logoLight from "../assets/logolight.png";
 
 const RootContainer = styled(Container)({
   display: "flex",
@@ -11,14 +21,13 @@ const RootContainer = styled(Container)({
   justifyContent: "center",
   minHeight: "100vh",
   position: "relative",
-  backgroundColor: "#3B0256", // Purple background
   color: "white",
 });
 
 const FormContainer = styled("div")(({ theme }) => ({
+  marginTop: theme.spacing(-20), // Adjust this to move form up
   width: "100%",
   maxWidth: 400,
-  marginTop: theme.spacing(1),
   padding: theme.spacing(3),
   backgroundColor: "rgba(0, 0, 0, 0.2)", // Slightly transparent dark background
   borderRadius: theme.shape.borderRadius,
@@ -28,6 +37,7 @@ const Form = styled("form")(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
+  width: "100%",
 }));
 
 const SubmitButton = styled(Button)(({ theme }) => ({
@@ -40,6 +50,7 @@ const SubmitButton = styled(Button)(({ theme }) => ({
 }));
 
 const Login: React.FC = () => {
+  const theme = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fadeIn, setFadeIn] = useState(false);
@@ -65,9 +76,14 @@ const Login: React.FC = () => {
     <Fade in={fadeIn} timeout={1000}>
       <RootContainer>
         <FormContainer>
-          <Typography component="h1" variant="h4" align="center" gutterBottom>
-            Panshi
-          </Typography>
+          <Box
+            component="img"
+            src={theme.palette.mode === "dark" ? logoDark : logoLight}
+            alt="Panshi Logo"
+            justifyContent="center"
+            alignItems="center"
+            sx={{ height: "100px", mb: 3 }}
+          />
           <Typography component="h2" variant="h5" align="center" gutterBottom>
             Login
           </Typography>
