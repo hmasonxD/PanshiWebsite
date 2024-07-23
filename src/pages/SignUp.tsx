@@ -9,6 +9,8 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
@@ -33,7 +35,7 @@ const StyledBox = styled(Box)({
 
 const StyledButton = styled(Button)({
   margin: "10px",
-  backgroundColor: "#4CAF50", // Green color
+  backgroundColor: "#F53391",
   color: "white",
   "&:hover": {
     backgroundColor: "#45a049",
@@ -42,12 +44,49 @@ const StyledButton = styled(Button)({
 
 const Signup: React.FC = () => {
   const [step, setStep] = useState(1);
+  const [gender, setGender] = useState("");
+  const [showGender, setShowGender] = useState(false);
   const [birthday, setBirthday] = useState({ month: "", day: "", year: "" });
+  const [firstName, setFirstName] = useState("");
+  const [locationEnabled, setLocationEnabled] = useState(false);
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const handleContinue = () => {
-    // Here you would add validation logic
     setStep(step + 1);
   };
+
+  const renderGenderStep = () => (
+    <>
+      <Typography variant="h5" gutterBottom>
+        What is your gender?
+      </Typography>
+      <Box display="flex" justifyContent="center" mb={2}>
+        <StyledButton onClick={() => setGender("Man")}>Man</StyledButton>
+        <StyledButton onClick={() => setGender("Woman")}>Woman</StyledButton>
+        <StyledButton onClick={() => setGender("Other")}>Other</StyledButton>
+      </Box>
+      {gender === "Other" && (
+        <TextField
+          label="Specify"
+          value={gender}
+          onChange={(e) => setGender(e.target.value)}
+          style={{ width: "100%", marginBottom: "10px" }}
+        />
+      )}
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={showGender}
+            onChange={(e) => setShowGender(e.target.checked)}
+            color="primary"
+          />
+        }
+        label="Show my gender on my profile"
+      />
+      <StyledButton onClick={handleContinue}>Continue</StyledButton>
+    </>
+  );
 
   const renderBirthdayStep = () => (
     <>
@@ -103,6 +142,50 @@ const Signup: React.FC = () => {
     </>
   );
 
+  const renderFirstNameStep = () => (
+    <>
+      <Typography variant="h5" gutterBottom>
+        What is your first name?
+      </Typography>
+      <Typography variant="caption" gutterBottom>
+        This is how you will appear on your profile. This cannot be changed
+        later.
+      </Typography>
+      <TextField
+        label="Type your first name here"
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+        style={{ width: "100%", marginBottom: "10px" }}
+      />
+      <StyledButton onClick={handleContinue}>Continue</StyledButton>
+    </>
+  );
+
+  const renderLocationStep = () => (
+    <>
+      <Typography variant="h5" gutterBottom>
+        Turn on location services
+      </Typography>
+      <StyledButton onClick={() => setLocationEnabled(true)}>
+        Set Your Location
+      </StyledButton>
+      <Button onClick={handleContinue} style={{ color: "white" }}>
+        Not Now
+      </Button>
+      <Button
+        onClick={handleContinue}
+        style={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+          color: "white",
+        }}
+      >
+        Skip
+      </Button>
+    </>
+  );
+
   const renderWelcomeStep = () => (
     <>
       <Typography variant="h5" gutterBottom>
@@ -111,19 +194,33 @@ const Signup: React.FC = () => {
       <Typography variant="h6" gutterBottom>
         How do you want to get started?
       </Typography>
-      <StyledButton fullWidth startIcon={<span>f</span>}>
+      <StyledButton
+        onClick={handleContinue}
+        fullWidth
+        startIcon={<span>f</span>}
+      >
         Continue with Facebook
       </StyledButton>
-      <StyledButton fullWidth startIcon={<span>G</span>}>
+      <StyledButton
+        onClick={handleContinue}
+        fullWidth
+        startIcon={<span>G</span>}
+      >
         Continue with Google
       </StyledButton>
       <Typography variant="h6" gutterBottom>
         or
       </Typography>
-      <StyledButton fullWidth startIcon={<span>📞</span>}>
+      <StyledButton
+        onClick={handleContinue}
+        fullWidth
+        startIcon={<span>📞</span>}
+      >
         Continue with Phone Number
       </StyledButton>
-      <Button color="secondary">Trouble Logging In?</Button>
+      <Button color="secondary" onClick={handleContinue}>
+        Trouble Logging In?
+      </Button>
       <StyledButton>Continue</StyledButton>
       <Box mt={2}>
         <Button size="small">Terms of Service</Button>
@@ -132,13 +229,89 @@ const Signup: React.FC = () => {
     </>
   );
 
+  const renderEmailStep = () => (
+    <>
+      <Typography variant="h5" gutterBottom>
+        Add your email to secure your account
+      </Typography>
+      <TextField
+        label="Email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        style={{ width: "100%", marginBottom: "10px" }}
+      />
+      <StyledButton onClick={handleContinue}>Continue</StyledButton>
+      <Button
+        onClick={handleContinue}
+        style={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+          color: "white",
+        }}
+      >
+        Not Now
+      </Button>
+    </>
+  );
+
+  const renderVerifyIdentityStep = () => (
+    <>
+      <Typography variant="h5" gutterBottom>
+        Verify your identity
+      </Typography>
+      <StyledButton onClick={handleContinue}>Resend Code</StyledButton>
+      <StyledButton onClick={handleContinue}>Continue</StyledButton>
+    </>
+  );
+
+  const renderPhoneNumberStep = () => (
+    <>
+      <Typography variant="h5" gutterBottom>
+        Could we get your phone number?
+      </Typography>
+      <TextField
+        label="Phone Number"
+        type="tel"
+        value={phoneNumber}
+        onChange={(e) => setPhoneNumber(e.target.value)}
+        style={{ width: "100%", marginBottom: "10px" }}
+      />
+      <StyledButton onClick={handleContinue}>Send Code</StyledButton>
+    </>
+  );
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return renderGenderStep();
+      case 2:
+        return renderBirthdayStep();
+      case 3:
+        return renderFirstNameStep();
+      case 4:
+        return renderLocationStep();
+      case 5:
+        return renderWelcomeStep();
+      case 6:
+        return renderEmailStep();
+      case 7:
+        return renderVerifyIdentityStep();
+      case 8:
+        return renderPhoneNumberStep();
+      default:
+        return renderGenderStep();
+    }
+  };
+
   return (
     <StyledContainer>
       <StyledBox>
         <Typography variant="h4" gutterBottom>
           Panshi
         </Typography>
-        {step === 1 ? renderBirthdayStep() : renderWelcomeStep()}
+        {renderStep()}
       </StyledBox>
     </StyledContainer>
   );
