@@ -11,6 +11,7 @@ import About from "./pages/About";
 import Support from "./pages/Support";
 import Download from "./pages/Download";
 import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard"; // You'll need to create this component
 import PageTransition from "./PageTransition";
 import { AuthProvider } from "./AuthContext"; // Import the AuthProvider
@@ -43,6 +44,7 @@ const App: React.FC = () => {
                 <Routes>
                   <Route path="/" element={<MatchSection />} />
                   <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<SignUp />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/product" element={<Product />} />
                   <Route path="/support" element={<Support />} />
