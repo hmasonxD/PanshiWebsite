@@ -21,7 +21,7 @@ const RootContainer = styled(Container)({
   justifyContent: "center",
   minHeight: "100vh",
   position: "relative",
-  color: "white",
+  // color: "white",
 });
 
 const FormContainer = styled("div")(({ theme }) => ({
@@ -75,14 +75,25 @@ const Login: React.FC = () => {
   return (
     <Fade in={fadeIn} timeout={1000}>
       <RootContainer>
-        <FormContainer>
+        <FormContainer
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+            bgcolor: theme.palette.background.default, // Adjust background color as needed
+            p: 3,
+          }}
+        >
           <Box
             component="img"
             src={theme.palette.mode === "dark" ? logoDark : logoLight}
             alt="Panshi Logo"
-            justifyContent="center"
-            alignItems="center"
-            sx={{ height: "100px", mb: 3 }}
+            sx={{
+              height: "100px",
+              mb: 3,
+            }}
           />
           <Typography component="h2" variant="h5" align="center" gutterBottom>
             Login
@@ -100,12 +111,6 @@ const Login: React.FC = () => {
               autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              InputProps={{
-                style: { color: "white" },
-              }}
-              InputLabelProps={{
-                style: { color: "white" },
-              }}
             />
             <TextField
               variant="outlined"
@@ -119,22 +124,12 @@ const Login: React.FC = () => {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              InputProps={{
-                style: { color: "white" },
-              }}
-              InputLabelProps={{
-                style: { color: "white" },
-              }}
             />
             <SubmitButton type="submit" fullWidth variant="contained">
               Sign In
             </SubmitButton>
           </Form>
-          <Button
-            fullWidth
-            onClick={() => navigate("/signup")}
-            style={{ color: "white" }}
-          >
+          <Button fullWidth onClick={() => navigate("/signup")}>
             Don't have an account? Sign Up
           </Button>
         </FormContainer>

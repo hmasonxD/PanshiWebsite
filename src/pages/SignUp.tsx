@@ -14,6 +14,8 @@ import {
   useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import logoDark from "../assets/logodark.png";
+import logoLight from "../assets/logolight.png";
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   display: "flex",
@@ -26,6 +28,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 }));
 
 const StyledBox = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(-20),
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -63,7 +66,15 @@ const SignUp: React.FC = () => {
       <Typography variant="h5" gutterBottom>
         What is your gender?
       </Typography>
-      <Box display="flex" justifyContent="center" mb={2}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column", // This stacks items vertically
+          alignItems: "center", // Centers items horizontally within the Box
+          justifyContent: "center", // Centers items vertically within the Box
+          mb: 2, // Adds margin-bottom for spacing
+        }}
+      >
         <StyledButton onClick={() => setGender("Man")}>Man</StyledButton>
         <StyledButton onClick={() => setGender("Woman")}>Woman</StyledButton>
         <StyledButton onClick={() => setGender("Other")}>Other</StyledButton>
@@ -288,9 +299,14 @@ const SignUp: React.FC = () => {
   return (
     <StyledContainer>
       <StyledBox>
-        <Typography variant="h4" gutterBottom>
-          Panshi
-        </Typography>
+        <Box
+          component="img"
+          src={theme.palette.mode === "dark" ? logoDark : logoLight}
+          alt="Panshi Logo"
+          justifyContent="center"
+          alignItems="center"
+          sx={{ height: "100px", mb: 3 }}
+        />
         {renderStep()}
       </StyledBox>
     </StyledContainer>

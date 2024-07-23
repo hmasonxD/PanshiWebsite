@@ -12,10 +12,11 @@ import Support from "./pages/Support";
 import Download from "./pages/Download";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
-import Dashboard from "./pages/Dashboard"; // You'll need to create this component
+import Dashboard from "./pages/Dashboard";
 import PageTransition from "./PageTransition";
 import { AuthProvider } from "./AuthContext"; // Import the AuthProvider
 import { ProtectedRoute } from "./components/ProtectedRoute"; // Import the ProtectedRoute component
+import LandingPage from "./pages/LandingPage";
 
 const App: React.FC = () => {
   const [darkMode, setDarkMode] = useState(true);
@@ -43,6 +44,7 @@ const App: React.FC = () => {
               <Box sx={{ flex: 1 }}>
                 <Routes>
                   <Route path="/" element={<MatchSection />} />
+                  <Route path="/landingpage" element={<LandingPage />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<SignUp />} />
                   <Route path="/about" element={<About />} />
