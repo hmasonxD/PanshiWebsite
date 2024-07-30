@@ -14,9 +14,11 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import PageTransition from "./PageTransition";
-import { AuthProvider } from "./AuthContext"; // Import the AuthProvider
-import { ProtectedRoute } from "./components/ProtectedRoute"; // Import the ProtectedRoute component
+import { AuthProvider } from "./AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
+import AccountSettings from "./pages/AccountSettings";
+import UserProfile from "./pages/UserProfile";
 
 const App: React.FC = () => {
   const [darkMode, setDarkMode] = useState(true);
@@ -57,6 +59,24 @@ const App: React.FC = () => {
                       <ProtectedRoute
                         authenticationPath="/login"
                         element={<Dashboard />}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/account-settings"
+                    element={
+                      <ProtectedRoute
+                        authenticationPath="/login"
+                        element={<AccountSettings />}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute
+                        authenticationPath="/login"
+                        element={<UserProfile />}
                       />
                     }
                   />

@@ -15,18 +15,20 @@ import {
   ThemeProvider,
   useTheme,
   useMediaQuery,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import MenuIcon from "@mui/icons-material/Menu";
 import logoDark from "../assets/logodark.png";
 import logoLight from "../assets/logolight.png";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useNavigate } from "react-router-dom";
 import { lightTheme, darkTheme } from "../theme";
 import LanguagePopup from "./LanguagePopup";
 import { useAuth } from "../AuthContext";
 
 type CustomTheme = typeof lightTheme;
-
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   height: "75px",
   backgroundColor: (theme as CustomTheme).customPalette.navbarBackground,
@@ -48,6 +50,16 @@ const NavButton = styled(Button)(({ theme }) => ({
   fontWeight: "normal",
   fontSize: "20px",
   padding: "8px 32px",
+}));
+
+const ProfileButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.primary.contrastText,
+  textTransform: "full-width",
+  display: "flex",
+  fontWeight: "bold",
+  fontSize: "20px",
+  alignItems: "center",
+  gap: "8px",
 }));
 
 const LoginButton = styled(Button)(({ theme }) => ({
@@ -73,10 +85,14 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
   const [languageAnchorEl, setLanguageAnchorEl] = useState<null | HTMLElement>(
     null
   );
+  const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
   const { isAuthenticated, logout } = useAuth();
   const theme = useTheme() as CustomTheme;
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
+
   const toggleDrawer =
     (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
       if (
@@ -96,9 +112,19 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
   const handleLanguageClose = () => {
     setLanguageAnchorEl(null);
   };
+
+  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
+    setProfileAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileClose = () => {
+    setProfileAnchorEl(null);
+  };
+
   const handleLogout = () => {
     logout();
     navigate("/login");
+    handleProfileClose();
   };
 
   const navItems = [
@@ -160,7 +186,8 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
                     sx={{
                       fontSize: 20,
                       mr: 1,
-                      color: theme.palette.text.primary,
+                      color:
+                        theme.palette.mode === "dark" ? "#F3EFF4" : "#F53391",
                     }}
                   >
                     Dark Mode
@@ -173,14 +200,57 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
                 </Box>
               </>
             )}
-            <LoginButton
-              variant="contained"
-              onClick={
-                isAuthenticated ? handleLogout : () => navigate("/login")
-              }
-            >
-              {isAuthenticated ? "Logout" : "Login"}
-            </LoginButton>
+            {isAuthenticated ? (
+              <Box sx={{ flexGrow: 2, display: { xs: "none", md: "flex" } }}>
+                <ProfileButton
+                  onClick={handleProfileClick}
+                  endIcon={<AccountCircleIcon />}
+                >
+                  My Profile
+                </ProfileButton>
+                <Menu
+                  sx={{ mt: "45px" }}
+                  id="menu-appbar"
+                  anchorEl={profileAnchorEl}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(profileAnchorEl)}
+                  onClose={handleProfileClose}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      navigate("/profile");
+                      handleProfileClose();
+                    }}
+                  >
+                    View Profile
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      navigate("/account-settings");
+                      handleProfileClose();
+                    }}
+                  >
+                    Account Settings
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </Menu>
+              </Box>
+            ) : (
+              <LoginButton
+                variant="contained"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </LoginButton>
+            )}
             {isMobile && (
               <IconButton
                 color="inherit"

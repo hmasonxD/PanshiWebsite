@@ -20,5 +20,16 @@ model User {
   firstName String?
   gender    String?
   birthday  DateTime?
+  phoneNumber String?
   createdAt DateTime @default(now())
+  profile   Profile?
+}
+
+model Profile {
+  id       Int      @id @default(autoincrement())
+  bio      String?
+  photos   String[]
+  prompts  String[]
+  userId   Int      @unique
+  user     User     @relation(fields: [userId], references: [id])
 }

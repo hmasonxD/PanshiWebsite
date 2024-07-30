@@ -63,6 +63,69 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+app.get('/api/user-profile/:id', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { profile: true },
+    });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({
+      firstName: user.firstName,
+      email: user.email,
+      gender: user.gender,
+      birthday: user.birthday,
+      phoneNumber: user.phoneNumber,
+      bio: user.profile?.bio,
+      photos: user.profile?.photos,
+      prompts: user.profile?.prompts,
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ error: 'Error fetching user profile' });
+  }
+});
+
+app.put('/api/user-profile/:id', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const { bio, photos, prompts } = req.body;
+    const updatedProfile = await prisma.profile.upsert({
+      where: { userId },
+      update: { bio, photos, prompts },
+      create: { userId, bio, photos, prompts },
+    });
+    res.json(updatedProfile);
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500).json({ error: 'Error updating user profile' });
+  }
+});
+
+app.put('/api/user/:id', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const { firstName, email, gender, birthday, phoneNumber } = req.body;
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        firstName,
+        email,
+        gender,
+        birthday: birthday ? new Date(birthday) : undefined,
+        phoneNumber,
+      },
+    });
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Error updating user' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
