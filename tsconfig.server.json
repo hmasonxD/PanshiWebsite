@@ -6,10 +6,12 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": "."
   },
   "include": [
-    "server/**/*"
+    "server/**/*",
+    "prisma/**/*"
   ],
   "exclude": [
     "node_modules",

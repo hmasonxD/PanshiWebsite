@@ -90,7 +90,7 @@ const SignUp: React.FC = () => {
         throw new Error("Invalid date");
       }
 
-      await axios.post("http://localhost:3001/api/signup", {
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/signup`, {
         email,
         password,
         firstName,

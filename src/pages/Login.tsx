@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
+  Alert,
   Box,
   TextField,
   Button,
@@ -55,6 +56,7 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fadeIn, setFadeIn] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -64,18 +66,22 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError("");
     try {
-      const response = await axios.post("http://localhost:3001/api/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/login`,
+        {
+          email,
+          password,
+        }
+      );
       if (response.data.id) {
         await login(response.data.id.toString());
         navigate("/dashboard");
       }
     } catch (error) {
       console.error("Login failed:", error);
-      // Handle login error (e.g., show an error message)
+      setError("Login failed. Please check your credentials and try again.");
     }
   };
 
@@ -89,7 +95,7 @@ const Login: React.FC = () => {
             alignItems: "center",
             justifyContent: "center",
             height: "100vh",
-            bgcolor: theme.palette.background.default, // Adjust background color as needed
+            bgcolor: theme.palette.background.default,
             p: 3,
           }}
         >
@@ -105,6 +111,7 @@ const Login: React.FC = () => {
           <Typography component="h2" variant="h5" align="center" gutterBottom>
             Login
           </Typography>
+          {error && <Alert severity="error">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
             <TextField
               variant="outlined"
