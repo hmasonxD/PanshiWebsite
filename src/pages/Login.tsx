@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Box,
   TextField,
@@ -64,8 +65,14 @@ const Login: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      await login("fake-token"); // Replace with actual login logic
-      navigate("/dashboard");
+      const response = await axios.post("http://localhost:3001/api/login", {
+        email,
+        password,
+      });
+      if (response.data.id) {
+        await login(response.data.id.toString());
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error("Login failed:", error);
       // Handle login error (e.g., show an error message)

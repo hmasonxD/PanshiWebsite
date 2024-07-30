@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import {
   Button,
   Typography,
@@ -14,6 +15,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 import logoDark from "../assets/logodark.png";
 import logoLight from "../assets/logolight.png";
 
@@ -56,9 +58,50 @@ const SignUp: React.FC = () => {
   const [locationEnabled, setLocationEnabled] = useState(false); // eslint-disable-line
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleContinue = () => {
     setStep(step + 1);
+  };
+
+  const handleSignUp = async () => {
+    try {
+      const birthDate = new Date(
+        parseInt(birthday.year),
+        [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ].indexOf(birthday.month),
+        parseInt(birthday.day)
+      );
+
+      if (isNaN(birthDate.getTime())) {
+        throw new Error("Invalid date");
+      }
+
+      await axios.post("http://localhost:3001/api/signup", {
+        email,
+        password,
+        firstName,
+        gender,
+        birthday: birthDate.toISOString(),
+      });
+      navigate("/login");
+    } catch (error) {
+      console.error("Sign up failed:", error);
+      // Handle error (e.g., show error message to user)
+    }
   };
 
   const renderGenderStep = () => (
@@ -232,21 +275,16 @@ const SignUp: React.FC = () => {
         onChange={(e) => setEmail(e.target.value)}
         style={{ width: "100%", marginBottom: "10px" }}
       />
-      <StyledButton onClick={handleContinue}>Continue</StyledButton>
-      <Button
-        onClick={handleContinue}
-        style={{
-          position: "absolute",
-          top: "10px",
-          right: "10px",
-          color: theme.palette.primary.contrastText,
-        }}
-      >
-        Not Now
-      </Button>
+      <TextField
+        label="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        style={{ width: "100%", marginBottom: "10px" }}
+      />
+      <StyledButton onClick={handleSignUp}>Sign Up</StyledButton>
     </>
   );
-
   const renderVerifyIdentityStep = () => (
     <>
       <Typography variant="h5" gutterBottom>
