@@ -26,10 +26,11 @@ model User {
 }
 
 model Profile {
-  id       Int      @id @default(autoincrement())
-  bio      String?
-  photos   String[]
-  prompts  String[]
-  userId   Int      @unique
-  user     User     @relation(fields: [userId], references: [id])
+  id          Int      @id @default(autoincrement())
+  bio         String?
+  photos      String[]
+  prompts     String[]
+  profileIcon String?
+  userId      Int      @unique
+  user        User     @relation(fields: [userId], references: [id])
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Button,
@@ -18,6 +18,7 @@ import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import logoDark from "../assets/logodark.png";
 import logoLight from "../assets/logolight.png";
+import { useAuth } from "../AuthContext";
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   display: "flex",
@@ -60,6 +61,13 @@ const SignUp: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/profile");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleContinue = () => {
     setStep(step + 1);

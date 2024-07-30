@@ -4,16 +4,16 @@ import {
   Typography,
   Grid,
   Card,
-  CardMedia,
   Button,
   Box,
   Avatar,
   CircularProgress,
-  IconButton,
+  Paper,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import axios from "axios";
+import { styled } from "@mui/material/styles";
+import EditIcon from "@mui/icons-material/Edit";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 interface UserData {
   firstName: string;
@@ -22,35 +22,31 @@ interface UserData {
   bio: string;
   photos: string[];
   prompts: string[];
+  profileIcon?: string;
 }
+
+const ProfileAvatar = styled(Avatar)(({ theme }) => ({
+  width: theme.spacing(20),
+  height: theme.spacing(20),
+  marginBottom: theme.spacing(2),
+}));
+
+const PromptCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  backgroundColor: theme.palette.background.default,
+}));
 
 const UserProfile: React.FC = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const renderPhotoPlaceholder = (index: number) => (
-    <Card
-      sx={{
-        height: 140,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <IconButton color="primary" aria-label="upload picture" component="label">
-        <input hidden accept="image/*" type="file" />
-        <AddIcon />
-      </IconButton>
-    </Card>
-  );
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const userId = localStorage.getItem("userId");
-        if (!userId) {
-          throw new Error("User ID not found");
-        }
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/user-profile/${userId}`
         );
@@ -64,6 +60,18 @@ const UserProfile: React.FC = () => {
     };
     fetchUserData();
   }, []);
+
+  const calculateAge = (birthday: string) => {
+    const ageDifMs = Date.now() - new Date(birthday).getTime();
+    const ageDate = new Date(ageDifMs);
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+  };
+  const getFullImageUrl = (photoUrl: string) => {
+    if (photoUrl.startsWith("http")) {
+      return photoUrl;
+    }
+    return `${process.env.REACT_APP_API_URL}${photoUrl}`;
+  };
 
   if (loading) {
     return (
@@ -104,80 +112,77 @@ const UserProfile: React.FC = () => {
     );
   }
 
-  const calculateAge = (birthday: string) => {
-    const ageDifMs = Date.now() - new Date(birthday).getTime();
-    const ageDate = new Date(ageDifMs);
-    return Math.abs(ageDate.getUTCFullYear() - 1970);
-  };
-
   return (
     <Container maxWidth="md">
-      <Box display="flex" alignItems="center" mb={4}>
-        <Avatar
-          src={
-            userData.photos && userData.photos.length > 0
-              ? userData.photos[0]
-              : undefined
-          }
-          sx={{ width: 100, height: 100, marginRight: 2 }}
-        >
-          {userData.firstName ? userData.firstName[0].toUpperCase() : "?"}
-        </Avatar>
-        <Typography variant="h4" component="h1">
+      <Box display="flex" flexDirection="column" alignItems="center" my={4}>
+        <ProfileAvatar src={userData.profileIcon || undefined}>
+          {!userData.profileIcon && userData.firstName
+            ? userData.firstName[0].toUpperCase()
+            : "U"}
+        </ProfileAvatar>
+        <Typography variant="h4" component="h1" gutterBottom>
           {userData.firstName}'s Profile
         </Typography>
+        <Typography variant="subtitle1" gutterBottom>
+          {userData.gender}, {calculateAge(userData.birthday)} years old
+        </Typography>
       </Box>
-      <Grid container spacing={3}>
+
+      <Grid container spacing={4}>
         <Grid item xs={12} md={6}>
-          <Typography variant="h6">About Me</Typography>
-          <Typography>{userData.bio || "No bio available"}</Typography>
-          <Box mt={2}>
-            <Typography>
-              Age: {userData.birthday ? calculateAge(userData.birthday) : "N/A"}
-            </Typography>
-            <Typography>
-              Gender: {userData.gender || "Not specified"}
-            </Typography>
-          </Box>
+          <Typography variant="h6" gutterBottom>
+            About Me
+          </Typography>
+          <Typography paragraph>
+            {userData.bio || "No bio available"}
+          </Typography>
         </Grid>
+
         <Grid item xs={12} md={6}>
-          <Typography variant="h6">My Photos</Typography>
+          <Typography variant="h6" gutterBottom>
+            My Photos
+          </Typography>
           <Grid container spacing={2}>
-            {[0, 1, 2, 3].map((index) => (
-              <Grid item xs={6} key={index}>
-                {userData.photos && userData.photos[index] ? (
+            {userData.photos &&
+              userData.photos.map((photo, index) => (
+                <Grid item xs={6} key={index}>
                   <Card>
-                    <CardMedia
-                      component="img"
-                      height="140"
-                      image={userData.photos[index]}
+                    <img
+                      src={getFullImageUrl(photo)}
                       alt={`Photo ${index + 1}`}
+                      style={{
+                        width: "100%",
+                        height: "200px",
+                        objectFit: "cover",
+                      }}
                     />
                   </Card>
-                ) : (
-                  renderPhotoPlaceholder(index)
-                )}
-              </Grid>
-            ))}
+                </Grid>
+              ))}
           </Grid>
         </Grid>
+
         <Grid item xs={12}>
-          <Typography variant="h6">My Prompts</Typography>
+          <Typography variant="h6" gutterBottom>
+            My Prompts
+          </Typography>
           {userData.prompts && userData.prompts.length > 0 ? (
             userData.prompts.map((prompt, index) => (
-              <Typography key={index} paragraph>
-                {prompt}
-              </Typography>
+              <PromptCard key={index} elevation={2}>
+                <Typography variant="body1">{prompt}</Typography>
+              </PromptCard>
             ))
           ) : (
             <Typography>No prompts available</Typography>
           )}
         </Grid>
       </Grid>
-      <Box mt={3}>
+
+      <Box mt={4} display="flex" justifyContent="center">
         <Button
           variant="contained"
           color="primary"
+          startIcon={<EditIcon />}
           onClick={() => navigate("/account-settings")}
         >
           Edit Profile

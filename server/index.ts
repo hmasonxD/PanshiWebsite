@@ -1,4 +1,6 @@
 import express from 'express';
+import multer from 'multer';
+import path from 'path';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
@@ -9,7 +11,16 @@ dotenv.config();
 const prisma = new PrismaClient();
 const app = express();
 const port = process.env.SERVER_PORT || 3001;
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
 
+const upload = multer({ storage: storage });
 const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
 if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
@@ -20,6 +31,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/', (req, res) => {
   res.send('Server is running');
@@ -123,6 +135,62 @@ app.put('/api/user/:id', async (req, res) => {
   } catch (error) {
     console.error('Error updating user:', error);
     res.status(500).json({ error: 'Error updating user' });
+  }
+});
+app.post('/api/user-profile/:id/upload-photo', upload.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const userId = parseInt(req.params.id);
+    const photoUrl = `/uploads/${req.file.filename}`;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { profile: true },
+    });
+
+    if (!user || !user.profile) {
+      return res.status(404).json({ error: 'User or profile not found' });
+    }
+
+    const updatedPhotos = [...(user.profile.photos || []), photoUrl];
+
+    const updatedProfile = await prisma.profile.update({
+      where: { userId },
+      data: {
+        photos: updatedPhotos,
+      },
+    });
+
+    res.json({ photoUrl, photos: updatedProfile.photos });
+  } catch (error) {
+    console.error('Error uploading photo:', error);
+    res.status(500).json({ error: 'Error uploading photo' });
+  }
+});
+
+app.post('/api/user-profile/:id/upload-profile-icon', upload.single('profileIcon'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const userId = parseInt(req.params.id);
+    const profileIconUrl = `/uploads/${req.file.filename}`;
+
+    const updatedProfile = await prisma.profile.update({
+      where: { userId },
+      data: {
+        profileIcon: profileIconUrl,
+      },
+    });
+
+    res.json({ profileIconUrl });
+  } catch (error) {
+    console.error('Error uploading profile icon:', error);
+    res.status(500).json({ error: 'Error uploading profile icon' });
   }
 });
 
