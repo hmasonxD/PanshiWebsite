@@ -52,18 +52,8 @@ const Matches: React.FC = () => {
     }
   };
 
-  const handleMessage = async (userId: string) => {
-    try {
-      const currentUserId = localStorage.getItem("userId");
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/messages`, {
-        senderId: currentUserId,
-        recipientId: userId,
-        content: "Hi there! I'd like to connect with you.",
-      });
-      navigate(`/messaging?userId=${userId}`);
-    } catch (error) {
-      console.error("Failed to send message:", error);
-    }
+  const handleMessage = (userId: string) => {
+    navigate(`/messaging?userId=${userId}`);
   };
 
   if (loading) {

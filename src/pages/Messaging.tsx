@@ -11,10 +11,11 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
+  Divider,
 } from "@mui/material";
-import { Send } from "@mui/icons-material";
+import { Send, ArrowBack } from "@mui/icons-material";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -39,6 +40,7 @@ const Messaging: React.FC = () => {
   const [newMessage, setNewMessage] = useState("");
   const [selectedUser, setSelectedUser] = useState<Conversation | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -100,8 +102,8 @@ const Messaging: React.FC = () => {
       try {
         const currentUserId = localStorage.getItem("userId");
         await axios.post(`${process.env.REACT_APP_API_URL}/api/messages`, {
-          senderId: currentUserId,
-          recipientId: selectedConversation,
+          senderId: parseInt(currentUserId!),
+          recipientId: parseInt(selectedConversation),
           content: newMessage,
         });
         setNewMessage("");
@@ -112,6 +114,10 @@ const Messaging: React.FC = () => {
     }
   };
 
+  const handleBackToMatches = () => {
+    navigate("/matches");
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, height: "calc(100vh - 100px)" }}>
       <Paper elevation={3} sx={{ height: "100%", display: "flex" }}>
@@ -119,10 +125,16 @@ const Messaging: React.FC = () => {
           sx={{
             width: "30%",
             borderRight: "1px solid #e0e0e0",
-            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
-          <List>
+          <Box sx={{ p: 2, borderBottom: "1px solid #e0e0e0" }}>
+            <Button startIcon={<ArrowBack />} onClick={handleBackToMatches}>
+              Back to Matches
+            </Button>
+          </Box>
+          <List sx={{ flexGrow: 1, overflowY: "auto" }}>
             {selectedUser && (
               <ListItem
                 button
@@ -134,10 +146,11 @@ const Messaging: React.FC = () => {
                 </ListItemAvatar>
                 <ListItemText
                   primary={selectedUser.userName}
-                  secondary={selectedUser.lastMessage}
+                  secondary="New conversation"
                 />
               </ListItem>
             )}
+            {selectedUser && conversations.length > 0 && <Divider />}
             {conversations.map((conversation) => (
               <ListItem
                 button
@@ -159,6 +172,13 @@ const Messaging: React.FC = () => {
         <Box sx={{ width: "70%", display: "flex", flexDirection: "column" }}>
           {selectedConversation ? (
             <>
+              <Box sx={{ p: 2, borderBottom: "1px solid #e0e0e0" }}>
+                <Typography variant="h6">
+                  {selectedUser?.userName ||
+                    conversations.find((c) => c.userId === selectedConversation)
+                      ?.userName}
+                </Typography>
+              </Box>
               <Box sx={{ flexGrow: 1, overflowY: "auto", p: 2 }}>
                 {messages.map((message) => (
                   <Box
