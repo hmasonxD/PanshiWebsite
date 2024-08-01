@@ -8,10 +8,12 @@ import {
   Box,
   Avatar,
   CircularProgress,
+  IconButton,
   Paper,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -126,6 +128,13 @@ const UserProfile: React.FC = () => {
         <Typography variant="subtitle1" gutterBottom>
           {userData.gender}, {calculateAge(userData.birthday)} years old
         </Typography>
+        <IconButton
+          color="primary"
+          aria-label="account settings"
+          onClick={() => navigate("/account-settings")}
+        >
+          <SettingsIcon fontSize="medium" />
+        </IconButton>
       </Box>
 
       <Grid container spacing={4}>
@@ -149,7 +158,7 @@ const UserProfile: React.FC = () => {
                   <Card>
                     <img
                       src={getFullImageUrl(photo)}
-                      alt={`Photo ${index + 1}`}
+                      alt={`Photo ${index + 1}`} // eslint-disable-next-line
                       style={{
                         width: "100%",
                         height: "200px",

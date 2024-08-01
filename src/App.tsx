@@ -3,7 +3,6 @@ import { ThemeProvider, CssBaseline } from "@mui/material";
 import { Box } from "@mui/material";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import MatchSection from "./components/MatchSection";
 import Footer from "./components/Footer";
 import { darkTheme, lightTheme } from "./theme";
 import Product from "./pages/Product";
@@ -19,6 +18,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import AccountSettings from "./pages/AccountSettings";
 import UserProfile from "./pages/UserProfile";
+import Matches from "./pages/Matches";
+import Messaging from "./pages/Messaging";
 
 const App: React.FC = () => {
   const [darkMode, setDarkMode] = useState(true);
@@ -45,8 +46,7 @@ const App: React.FC = () => {
             >
               <Box sx={{ flex: 1 }}>
                 <Routes>
-                  <Route path="/" element={<MatchSection />} />
-                  <Route path="/landingpage" element={<LandingPage />} />
+                  <Route path="/" element={<LandingPage />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<SignUp />} />
                   <Route path="/about" element={<About />} />
@@ -77,6 +77,24 @@ const App: React.FC = () => {
                       <ProtectedRoute
                         authenticationPath="/login"
                         element={<UserProfile />}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/matches"
+                    element={
+                      <ProtectedRoute
+                        authenticationPath="/login"
+                        element={<Matches />}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/messaging"
+                    element={
+                      <ProtectedRoute
+                        authenticationPath="/login"
+                        element={<Messaging />}
                       />
                     }
                   />

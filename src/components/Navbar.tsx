@@ -18,17 +18,18 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
-import { styled } from "@mui/system";
+import { styled } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
-import logoDark from "../assets/logodark.png";
-import logoLight from "../assets/logolight.png";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useNavigate } from "react-router-dom";
 import { lightTheme, darkTheme } from "../theme";
 import LanguagePopup from "./LanguagePopup";
 import { useAuth } from "../AuthContext";
+import logoDark from "../assets/logodark.png";
+import logoLight from "../assets/logolight.png";
 
 type CustomTheme = typeof lightTheme;
+
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   height: "75px",
   backgroundColor: (theme as CustomTheme).customPalette.navbarBackground,
@@ -38,26 +39,25 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 const StyledToolbar = styled(Toolbar)({
   height: "100%",
   display: "flex",
-  flexDirection: "row-reverse", // Reverse the row direction
   justifyContent: "space-between",
   alignItems: "center",
-  padding: "0 32px",
+  padding: "0 16px",
 });
 
 const NavButton = styled(Button)(({ theme }) => ({
   color: theme.palette.mode === "dark" ? "#F3EFF4" : "#F53391",
   textTransform: "none",
   fontWeight: "normal",
-  fontSize: "20px",
-  padding: "8px 32px",
+  fontSize: "16px",
+  padding: "8px 16px",
 }));
 
 const ProfileButton = styled(Button)(({ theme }) => ({
   color: theme.palette.primary.contrastText,
-  textTransform: "full-width",
-  display: "flex",
+  textTransform: "none",
   fontWeight: "bold",
-  fontSize: "20px",
+  fontSize: "16px",
+  display: "flex",
   alignItems: "center",
   gap: "8px",
 }));
@@ -67,8 +67,8 @@ const LoginButton = styled(Button)(({ theme }) => ({
   color: "#F3EFF4",
   textTransform: "none",
   fontWeight: "bold",
-  fontSize: "20px",
-  padding: "8px 32px",
+  fontSize: "16px",
+  padding: "8px 24px",
   borderRadius: "20px",
   "&:hover": {
     backgroundColor: "#d62a7a",
@@ -90,7 +90,7 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
   );
   const { isAuthenticated, logout } = useAuth();
   const theme = useTheme() as CustomTheme;
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
 
   const toggleDrawer =
@@ -128,8 +128,10 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
   };
 
   const navItems = [
+    { label: "Find Your Match", path: "/matches" },
+    { label: "Messages", path: "/messaging" },
     { label: "Product", path: "/product" },
-    { label: "About US", path: "/about" },
+    { label: "About Us", path: "/about" },
     { label: "Support", path: "/support" },
     { label: "Download", path: "/download" },
   ];
@@ -150,7 +152,7 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
           </ListItem>
         ))}
       </List>
-      <Box sx={{ display: "flex", alignItems: "center", padding: "8px 32px" }}>
+      <Box sx={{ display: "flex", alignItems: "center", padding: "8px 16px" }}>
         <Typography
           variant="body2"
           sx={{ mr: 1, color: theme.palette.text.primary }}
@@ -166,7 +168,21 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
     <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
       <StyledAppBar position="sticky">
         <StyledToolbar>
-          <Box sx={{ display: "flex", alignItems: "center", mr: 24 }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <img
+              src={darkMode ? logoDark : logoLight}
+              alt="Panshi Logo"
+              style={{ height: "60px", marginRight: "32px", cursor: "pointer" }}
+              onClick={() => navigate("/")}
+            />
+            {!isMobile &&
+              navItems.map((item) => (
+                <NavButton key={item.label} onClick={() => navigate(item.path)}>
+                  {item.label}
+                </NavButton>
+              ))}
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             {!isMobile && (
               <>
                 <NavButton onClick={handleLanguageClick}>Language</NavButton>
@@ -174,17 +190,11 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
                   anchorEl={languageAnchorEl}
                   onClose={handleLanguageClose}
                 />
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "8px 32px",
-                  }}
-                >
+                <Box sx={{ display: "flex", alignItems: "center", mx: 2 }}>
                   <Typography
                     variant="body2"
                     sx={{
-                      fontSize: 20,
+                      fontSize: 16,
                       mr: 1,
                       color:
                         theme.palette.mode === "dark" ? "#F3EFF4" : "#F53391",
@@ -201,7 +211,7 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
               </>
             )}
             {isAuthenticated ? (
-              <Box sx={{ flexGrow: 2, display: { xs: "none", md: "flex" } }}>
+              <Box sx={{ display: { xs: "none", md: "flex" } }}>
                 <ProfileButton
                   onClick={handleProfileClick}
                   endIcon={<AccountCircleIcon />}
@@ -209,11 +219,10 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
                   My Profile
                 </ProfileButton>
                 <Menu
-                  sx={{ mt: "45px" }}
                   id="menu-appbar"
                   anchorEl={profileAnchorEl}
                   anchorOrigin={{
-                    vertical: "top",
+                    vertical: "bottom",
                     horizontal: "right",
                   }}
                   keepMounted
@@ -257,25 +266,11 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
                 aria-label="open drawer"
                 edge="end"
                 onClick={toggleDrawer(true)}
-                sx={{ ml: 2 }}
+                sx={{ ml: 1 }}
               >
                 <MenuIcon />
               </IconButton>
             )}
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", ml: 24 }}>
-            <img
-              src={darkMode ? logoDark : logoLight}
-              alt="Panshi Logo"
-              style={{ height: "60px", marginRight: "32px", cursor: "pointer" }}
-              onClick={() => navigate("/")}
-            />
-            {!isMobile &&
-              navItems.map((item) => (
-                <NavButton key={item.label} onClick={() => navigate(item.path)}>
-                  {item.label}
-                </NavButton>
-              ))}
           </Box>
         </StyledToolbar>
         <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>

@@ -94,6 +94,7 @@ app.get('/api/user-profile/:id', async (req, res) => {
       bio: user.profile?.bio,
       photos: user.profile?.photos,
       prompts: user.profile?.prompts,
+      profileIcon: user.profile?.profileIcon,
     });
   } catch (error) {
     console.error('Error fetching user profile:', error);
@@ -137,6 +138,7 @@ app.put('/api/user/:id', async (req, res) => {
     res.status(500).json({ error: 'Error updating user' });
   }
 });
+
 app.post('/api/user-profile/:id/upload-photo', upload.single('photo'), async (req, res) => {
   try {
     if (!req.file) {
@@ -151,18 +153,27 @@ app.post('/api/user-profile/:id/upload-photo', upload.single('photo'), async (re
       include: { profile: true },
     });
 
-    if (!user || !user.profile) {
-      return res.status(404).json({ error: 'User or profile not found' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    const updatedPhotos = [...(user.profile.photos || []), photoUrl];
-
-    const updatedProfile = await prisma.profile.update({
-      where: { userId },
-      data: {
-        photos: updatedPhotos,
-      },
-    });
+    let updatedProfile;
+    if (user.profile) {
+      const updatedPhotos = [...(user.profile.photos || []), photoUrl];
+      updatedProfile = await prisma.profile.update({
+        where: { userId },
+        data: {
+          photos: updatedPhotos,
+        },
+      });
+    } else {
+      updatedProfile = await prisma.profile.create({
+        data: {
+          userId,
+          photos: [photoUrl],
+        },
+      });
+    }
 
     res.json({ photoUrl, photos: updatedProfile.photos });
   } catch (error) {
@@ -180,17 +191,193 @@ app.post('/api/user-profile/:id/upload-profile-icon', upload.single('profileIcon
     const userId = parseInt(req.params.id);
     const profileIconUrl = `/uploads/${req.file.filename}`;
 
-    const updatedProfile = await prisma.profile.update({
-      where: { userId },
-      data: {
-        profileIcon: profileIconUrl,
-      },
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { profile: true },
     });
 
-    res.json({ profileIconUrl });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    let updatedProfile;
+    if (user.profile) {
+      updatedProfile = await prisma.profile.update({
+        where: { userId },
+        data: {
+          profileIcon: profileIconUrl,
+        },
+      });
+    } else {
+      updatedProfile = await prisma.profile.create({
+        data: {
+          userId,
+          profileIcon: profileIconUrl,
+        },
+      });
+    }
+
+    res.json({ profileIconUrl: updatedProfile.profileIcon });
   } catch (error) {
     console.error('Error uploading profile icon:', error);
     res.status(500).json({ error: 'Error uploading profile icon' });
+  }
+});
+
+// Get all users with their like status for the current user
+app.get('/api/users', async (req, res) => {
+  try {
+    const currentUserId = parseInt(req.query.currentUserId as string);
+    const users = await prisma.user.findMany({
+      include: { 
+        profile: true,
+        receivedLikes: {
+          where: {
+            likerId: currentUserId
+          }
+        }
+      },
+    });
+    res.json(users.map(user => ({
+      id: user.id,
+      firstName: user.firstName,
+      age: user.birthday ? Math.floor((new Date().getTime() - new Date(user.birthday).getTime()) / 3.15576e+10) : null,
+      bio: user.profile?.bio,
+      profileIcon: user.profile?.profileIcon,
+      isLiked: user.receivedLikes.length > 0
+    })));
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Error fetching users' });
+  }
+});
+
+// Like a user
+app.post('/api/like/:userId', async (req, res) => {
+  try {
+    const likerId = parseInt(req.body.likerId);
+    const likedId = parseInt(req.params.userId);
+    
+    const existingLike = await prisma.like.findFirst({
+      where: {
+        likerId,
+        likedId,
+      },
+    });
+
+    if (existingLike) {
+      return res.status(400).json({ error: 'User already liked' });
+    }
+
+    const like = await prisma.like.create({
+      data: {
+        likerId,
+        likedId,
+      },
+    });
+    
+    res.json(like);
+  } catch (error) {
+    console.error('Error liking user:', error);
+    res.status(500).json({ error: 'Error liking user' });
+  }
+});
+
+// Get likes for a user
+app.get('/api/likes/:userId', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId);
+    const likes = await prisma.like.findMany({
+      where: {
+        likedId: userId,
+      },
+      include: {
+        liker: true,
+      },
+    });
+    res.json(likes.map(like => ({
+      id: like.id,
+      likerId: like.likerId,
+      likerName: like.liker.firstName,
+    })));
+  } catch (error) {
+    console.error('Error fetching likes:', error);
+    res.status(500).json({ error: 'Error fetching likes' });
+  }
+});
+app.get('/api/conversations', async (req, res) => {
+  try {
+    const userId = parseInt(req.query.userId as string);
+    const conversations = await prisma.message.findMany({
+      where: {
+        OR: [
+          { senderId: userId },
+          { recipientId: userId },
+        ],
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      distinct: ['senderId', 'recipientId'],
+      include: {
+        sender: true,
+        recipient: true,
+      },
+    });
+    
+    res.json(conversations.map(conv => ({
+      id: conv.id,
+      userId: conv.senderId === userId ? conv.recipientId : conv.senderId,
+      userName: conv.senderId === userId ? conv.recipient.firstName : conv.sender.firstName,
+      lastMessage: conv.content,
+    })));
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+    res.status(500).json({ error: 'Error fetching conversations' });
+  }
+});
+
+app.get('/api/messages/:userId', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId);
+    const currentUserId = parseInt(req.query.currentUserId as string);
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          { senderId: userId, recipientId: currentUserId },
+          { senderId: currentUserId, recipientId: userId },
+        ],
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+    res.json(messages);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ error: 'Error fetching messages' });
+  }
+});
+
+app.post('/api/messages', async (req, res) => {
+  try {
+    const { senderId, recipientId, content } = req.body;
+    const message = await prisma.message.create({
+      data: {
+        senderId,
+        recipientId,
+        content,
+      },
+      include: {
+        sender: true,
+      },
+    });
+    
+    res.json({
+      ...message,
+      senderName: message.sender.firstName,
+    });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ error: 'Error sending message' });
   }
 });
 

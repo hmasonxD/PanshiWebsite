@@ -12,7 +12,6 @@ import {
   Avatar,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import SettingsIcon from "@mui/icons-material/Settings";
 import SaveIcon from "@mui/icons-material/Save";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import axios from "axios";
@@ -41,7 +40,17 @@ const PromptPaper = styled(Paper)(({ theme }) => ({
 }));
 
 const AccountSettings: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>({
+    firstName: "",
+    email: "",
+    gender: "",
+    birthday: "",
+    phoneNumber: "",
+    bio: "",
+    photos: [],
+    prompts: ["", "", ""],
+    profileIcon: "",
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,8 +60,12 @@ const AccountSettings: React.FC = () => {
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/user-profile/${userId}`
         );
+        const formattedBirthday = response.data.birthday
+          ? new Date(response.data.birthday).toISOString().split("T")[0]
+          : "";
         setUser({
           ...response.data,
+          birthday: formattedBirthday,
           prompts: response.data.prompts || ["", "", ""],
           photos: response.data.photos || [],
         });
@@ -117,7 +130,7 @@ const AccountSettings: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    if (file && user) {
+    if (file) {
       const formData = new FormData();
       formData.append("profileIcon", file);
 
@@ -204,15 +217,6 @@ const AccountSettings: React.FC = () => {
             type="file"
             onChange={handleProfileIconUpload}
           />
-          <label htmlFor="profile-icon-upload">
-            <IconButton
-              color="primary"
-              aria-label="upload picture"
-              component="span"
-            >
-              <SettingsIcon fontSize="large" />
-            </IconButton>
-          </label>
           <label htmlFor="icon-button-file">
             <IconButton
               color="primary"

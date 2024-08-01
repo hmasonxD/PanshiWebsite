@@ -23,6 +23,10 @@ model User {
   phoneNumber String?
   createdAt DateTime @default(now())
   profile   Profile?
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  sentLikes        Like[]    @relation("SentLikes")
+  receivedLikes    Like[]    @relation("ReceivedLikes")
 }
 
 model Profile {
@@ -33,4 +37,23 @@ model Profile {
   profileIcon String?
   userId      Int      @unique
   user        User     @relation(fields: [userId], references: [id])
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  senderId  Int
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+  recipientId Int
+  recipient User     @relation("ReceivedMessages", fields: [recipientId], references: [id])
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  likerId   Int
+  liker     User     @relation("SentLikes", fields: [likerId], references: [id])
+  likedId   Int
+  liked     User     @relation("ReceivedLikes", fields: [likedId], references: [id])
 }
