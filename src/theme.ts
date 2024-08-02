@@ -37,7 +37,7 @@ const darkTheme = createTheme({
     palette: {
         mode: 'dark',
         primary: {
-            main: '#F53391', // Pink color for login button
+            main: '#6C009F', // Pink color for login button
         },
         background: {
             default: '#3B0256',

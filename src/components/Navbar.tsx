@@ -53,7 +53,7 @@ const NavButton = styled(Button)(({ theme }) => ({
 }));
 
 const ProfileButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.primary.contrastText,
+  color: theme.palette.mode === "dark" ? "#F3EFF4" : "#F53391",
   textTransform: "none",
   fontWeight: "bold",
   fontSize: "16px",
@@ -63,7 +63,8 @@ const ProfileButton = styled(Button)(({ theme }) => ({
 }));
 
 const LoginButton = styled(Button)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
+  // color: theme.palette.mode === "dark" ? "#F3EFF4" : "#F53391",
+  // background: theme.palette.mode === "dark" ? "#F9E4A0" : "#F3EFF4",
   color: "#F3EFF4",
   textTransform: "none",
   fontWeight: "bold",
@@ -71,7 +72,7 @@ const LoginButton = styled(Button)(({ theme }) => ({
   padding: "8px 24px",
   borderRadius: "20px",
   "&:hover": {
-    backgroundColor: "#d62a7a",
+    backgroundColor: "#E67C7C",
   },
 }));
 
