@@ -11,6 +11,8 @@ dotenv.config();
 const prisma = new PrismaClient();
 const app = express();
 const port = process.env.SERVER_PORT || 3001;
+
+// Multer configuration for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -21,6 +23,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+
+// CORS configuration
 const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
 if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
@@ -30,13 +34,16 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true,
 }));
+
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Root route
 app.get('/', (req, res) => {
   res.send('Server is running');
 });
 
+// User signup
 app.post('/api/signup', async (req, res) => {
   try {
     const { email, password, firstName, gender, birthday } = req.body;
@@ -57,6 +64,7 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
+// User login
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -75,6 +83,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Get user profile
 app.get('/api/user-profile/:id', async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
@@ -102,6 +111,7 @@ app.get('/api/user-profile/:id', async (req, res) => {
   }
 });
 
+// Update user profile
 app.put('/api/user-profile/:id', async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
@@ -118,6 +128,7 @@ app.put('/api/user-profile/:id', async (req, res) => {
   }
 });
 
+// Update user information
 app.put('/api/user/:id', async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
@@ -139,6 +150,7 @@ app.put('/api/user/:id', async (req, res) => {
   }
 });
 
+// Upload photo
 app.post('/api/user-profile/:id/upload-photo', upload.single('photo'), async (req, res) => {
   try {
     if (!req.file) {
@@ -182,6 +194,7 @@ app.post('/api/user-profile/:id/upload-photo', upload.single('photo'), async (re
   }
 });
 
+// Upload profile icon
 app.post('/api/user-profile/:id/upload-profile-icon', upload.single('profileIcon'), async (req, res) => {
   try {
     if (!req.file) {
@@ -227,24 +240,28 @@ app.post('/api/user-profile/:id/upload-profile-icon', upload.single('profileIcon
 // Get all users with their like status for the current user
 app.get('/api/users', async (req, res) => {
   try {
-    const currentUserId = parseInt(req.query.currentUserId as string);
+    const currentUserId = req.query.currentUserId ? parseInt(req.query.currentUserId as string) : undefined;
+    
     const users = await prisma.user.findMany({
       include: { 
         profile: true,
-        receivedLikes: {
-          where: {
-            likerId: currentUserId
+        ...(currentUserId ? {
+          receivedLikes: {
+            where: {
+              likerId: currentUserId
+            }
           }
-        }
+        } : {})
       },
     });
+    
     res.json(users.map(user => ({
       id: user.id,
       firstName: user.firstName,
       age: user.birthday ? Math.floor((new Date().getTime() - new Date(user.birthday).getTime()) / 3.15576e+10) : null,
       bio: user.profile?.bio,
       profileIcon: user.profile?.profileIcon,
-      isLiked: user.receivedLikes.length > 0
+      isLiked: currentUserId ? user.receivedLikes.length > 0 : undefined
     })));
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -305,6 +322,8 @@ app.get('/api/likes/:userId', async (req, res) => {
     res.status(500).json({ error: 'Error fetching likes' });
   }
 });
+
+// Get conversations for a user
 app.get('/api/conversations', async (req, res) => {
   try {
     const userId = parseInt(req.query.userId as string);
@@ -337,6 +356,7 @@ app.get('/api/conversations', async (req, res) => {
   }
 });
 
+// Get messages between two users
 app.get('/api/messages/:userId', async (req, res) => {
   try {
     const userId = parseInt(req.params.userId);
@@ -357,6 +377,7 @@ app.get('/api/messages/:userId', async (req, res) => {
   }
 });
 
+// Send a message
 app.post('/api/messages', async (req, res) => {
   try {
     const { senderId, recipientId, content } = req.body;
@@ -381,6 +402,7 @@ app.post('/api/messages', async (req, res) => {
   }
 });
 
+// Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

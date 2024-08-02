@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Container, Grid, Typography, CircularProgress } from "@mui/material";
+import {
+  Container,
+  Grid,
+  Typography,
+  CircularProgress,
+  Pagination,
+  Box,
+} from "@mui/material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import UserCard from "../components/UserCard";
@@ -16,7 +23,10 @@ interface User {
 const Matches: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
+  const usersPerPage = 9;
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -26,6 +36,7 @@ const Matches: React.FC = () => {
           `${process.env.REACT_APP_API_URL}/api/users?currentUserId=${currentUserId}`
         );
         setUsers(response.data);
+        setTotalPages(Math.ceil(response.data.length / usersPerPage));
       } catch (error) {
         console.error("Failed to fetch users:", error);
       } finally {
@@ -56,17 +67,38 @@ const Matches: React.FC = () => {
     navigate(`/messaging?userId=${userId}`);
   };
 
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setPage(value);
+  };
+
   if (loading) {
-    return <CircularProgress />;
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
+  const paginatedUsers = users.slice(
+    (page - 1) * usersPerPage,
+    page * usersPerPage
+  );
+
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Typography variant="h4" gutterBottom align="center">
         Discover Matches
       </Typography>
-      <Grid container spacing={3}>
-        {users.map((user) => (
+      <Grid container spacing={3} justifyContent="center">
+        {paginatedUsers.map((user) => (
           <Grid item xs={12} sm={6} md={4} key={user.id}>
             <UserCard
               user={{
@@ -80,6 +112,15 @@ const Matches: React.FC = () => {
           </Grid>
         ))}
       </Grid>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={handlePageChange}
+          color="primary"
+          size="large"
+        />
+      </Box>
     </Container>
   );
 };

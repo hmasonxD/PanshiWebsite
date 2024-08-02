@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ThemeProvider, CssBaseline } from "@mui/material";
+import { useLocation } from "react-router-dom";
 import { Box } from "@mui/material";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
@@ -21,7 +22,17 @@ import UserProfile from "./pages/UserProfile";
 import Matches from "./pages/Matches";
 import Messaging from "./pages/Messaging";
 
-const App: React.FC = () => {
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
+const AppContent: React.FC = () => {
   const [darkMode, setDarkMode] = useState(true);
 
   const toggleDarkMode = () => {
@@ -31,80 +42,87 @@ const App: React.FC = () => {
   const theme = darkMode ? darkTheme : lightTheme;
 
   return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <ScrollToTop />
+      <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      <PageTransition>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "100vh",
+          }}
+        >
+          <Box sx={{ flex: 1 }}>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/product" element={<Product />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/download" element={<Download />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute
+                    authenticationPath="/login"
+                    element={<Dashboard />}
+                  />
+                }
+              />
+              <Route
+                path="/account-settings"
+                element={
+                  <ProtectedRoute
+                    authenticationPath="/login"
+                    element={<AccountSettings />}
+                  />
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute
+                    authenticationPath="/login"
+                    element={<UserProfile />}
+                  />
+                }
+              />
+              <Route
+                path="/matches"
+                element={
+                  <ProtectedRoute
+                    authenticationPath="/login"
+                    element={<Matches />}
+                  />
+                }
+              />
+              <Route
+                path="/messaging"
+                element={
+                  <ProtectedRoute
+                    authenticationPath="/login"
+                    element={<Messaging />}
+                  />
+                }
+              />
+            </Routes>
+          </Box>
+          <Footer />
+        </Box>
+      </PageTransition>
+    </ThemeProvider>
+  );
+};
+
+const App: React.FC = () => {
+  return (
     <AuthProvider>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router>
-          <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-          <PageTransition>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                minHeight: "100vh",
-              }}
-            >
-              <Box sx={{ flex: 1 }}>
-                <Routes>
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<SignUp />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/product" element={<Product />} />
-                  <Route path="/support" element={<Support />} />
-                  <Route path="/download" element={<Download />} />
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <ProtectedRoute
-                        authenticationPath="/login"
-                        element={<Dashboard />}
-                      />
-                    }
-                  />
-                  <Route
-                    path="/account-settings"
-                    element={
-                      <ProtectedRoute
-                        authenticationPath="/login"
-                        element={<AccountSettings />}
-                      />
-                    }
-                  />
-                  <Route
-                    path="/profile"
-                    element={
-                      <ProtectedRoute
-                        authenticationPath="/login"
-                        element={<UserProfile />}
-                      />
-                    }
-                  />
-                  <Route
-                    path="/matches"
-                    element={
-                      <ProtectedRoute
-                        authenticationPath="/login"
-                        element={<Matches />}
-                      />
-                    }
-                  />
-                  <Route
-                    path="/messaging"
-                    element={
-                      <ProtectedRoute
-                        authenticationPath="/login"
-                        element={<Messaging />}
-                      />
-                    }
-                  />
-                </Routes>
-              </Box>
-              <Footer />
-            </Box>
-          </PageTransition>
-        </Router>
-      </ThemeProvider>
+      <Router>
+        <AppContent />
+      </Router>
     </AuthProvider>
   );
 };

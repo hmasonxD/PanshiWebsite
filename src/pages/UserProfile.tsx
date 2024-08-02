@@ -68,7 +68,9 @@ const UserProfile: React.FC = () => {
     const ageDate = new Date(ageDifMs);
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
-  const getFullImageUrl = (photoUrl: string) => {
+
+  const getFullImageUrl = (photoUrl: string | undefined) => {
+    if (!photoUrl) return undefined;
     if (photoUrl.startsWith("http")) {
       return photoUrl;
     }
@@ -117,10 +119,8 @@ const UserProfile: React.FC = () => {
   return (
     <Container maxWidth="md">
       <Box display="flex" flexDirection="column" alignItems="center" my={4}>
-        <ProfileAvatar src={userData.profileIcon || undefined}>
-          {!userData.profileIcon && userData.firstName
-            ? userData.firstName[0].toUpperCase()
-            : "U"}
+        <ProfileAvatar src={getFullImageUrl(userData.profileIcon)}>
+          {userData.firstName ? userData.firstName[0].toUpperCase() : "U"}
         </ProfileAvatar>
         <Typography variant="h4" component="h1" gutterBottom>
           {userData.firstName}'s Profile
