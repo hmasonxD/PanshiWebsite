@@ -47,72 +47,63 @@ const AppContent: React.FC = () => {
       <ScrollToTop />
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
       <PageTransition>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            minHeight: "100vh",
-          }}
-        >
-          <Box sx={{ flex: 1 }}>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/product" element={<Product />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/download" element={<Download />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute
-                    authenticationPath="/login"
-                    element={<Dashboard />}
-                  />
-                }
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/product" element={<Product />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/download" element={<Download />} />
+          <Route path="/user-profile/:userId" element={<UserProfile />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute
+                authenticationPath="/login"
+                element={<UserProfile />}
               />
-              <Route
-                path="/account-settings"
-                element={
-                  <ProtectedRoute
-                    authenticationPath="/login"
-                    element={<AccountSettings />}
-                  />
-                }
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute
+                authenticationPath="/login"
+                element={<Dashboard />}
               />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute
-                    authenticationPath="/login"
-                    element={<UserProfile />}
-                  />
-                }
+            }
+          />
+          <Route
+            path="/account-settings"
+            element={
+              <ProtectedRoute
+                authenticationPath="/login"
+                element={<AccountSettings />}
               />
-              <Route
-                path="/matches"
-                element={
-                  <ProtectedRoute
-                    authenticationPath="/login"
-                    element={<Matches />}
-                  />
-                }
+            }
+          />
+          <Route
+            path="/matches"
+            element={
+              <ProtectedRoute
+                authenticationPath="/login"
+                element={<Matches />}
               />
-              <Route
-                path="/messaging"
-                element={
-                  <ProtectedRoute
-                    authenticationPath="/login"
-                    element={<Messaging />}
-                  />
-                }
+            }
+          />
+          <Route
+            path="/messaging"
+            element={
+              <ProtectedRoute
+                authenticationPath="/login"
+                element={<Messaging />}
               />
-            </Routes>
-          </Box>
-          <Footer />
-        </Box>
+            }
+          />
+        </Routes>
       </PageTransition>
+      <Footer />
     </ThemeProvider>
   );
 };

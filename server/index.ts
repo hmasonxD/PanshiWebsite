@@ -339,8 +339,12 @@ app.get('/api/conversations', async (req, res) => {
       },
       distinct: ['senderId', 'recipientId'],
       include: {
-        sender: true,
-        recipient: true,
+        sender: {
+          include: { profile: true }
+        },
+        recipient: {
+          include: { profile: true }
+        },
       },
     });
     
@@ -349,6 +353,7 @@ app.get('/api/conversations', async (req, res) => {
       userId: conv.senderId === userId ? conv.recipientId : conv.senderId,
       userName: conv.senderId === userId ? conv.recipient.firstName : conv.sender.firstName,
       lastMessage: conv.content,
+      profileIcon: conv.senderId === userId ? conv.recipient.profile?.profileIcon : conv.sender.profile?.profileIcon,
     })));
   } catch (error) {
     console.error('Error fetching conversations:', error);
@@ -369,14 +374,21 @@ app.get('/api/messages/:userId', async (req, res) => {
         ],
       },
       orderBy: { createdAt: 'asc' },
+      include: {
+        sender: {
+          include: { profile: true }
+        },
+      },
     });
-    res.json(messages);
+    res.json(messages.map(message => ({
+      ...message,
+      senderProfileIcon: message.sender.profile?.profileIcon,
+    })));
   } catch (error) {
     console.error('Error fetching messages:', error);
     res.status(500).json({ error: 'Error fetching messages' });
   }
 });
-
 // Send a message
 app.post('/api/messages', async (req, res) => {
   try {
@@ -388,13 +400,16 @@ app.post('/api/messages', async (req, res) => {
         content,
       },
       include: {
-        sender: true,
+        sender: {
+          include: { profile: true }
+        },
       },
     });
     
     res.json({
       ...message,
       senderName: message.sender.firstName,
+      senderProfileIcon: message.sender.profile?.profileIcon,
     });
   } catch (error) {
     console.error('Error sending message:', error);

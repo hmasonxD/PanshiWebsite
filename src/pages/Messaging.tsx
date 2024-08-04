@@ -30,12 +30,14 @@ interface Message {
   recipientId: string;
   content: string;
   createdAt: string;
+  senderProfileIcon?: string;
 }
 
 interface Conversation {
   userId: string;
   userName: string;
   lastMessage: string;
+  profileIcon?: string;
 }
 
 interface User {
@@ -59,6 +61,7 @@ const Messaging: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
 
   const fetchUserDetails = useCallback(async (userId: string) => {
     try {
@@ -69,6 +72,7 @@ const Messaging: React.FC = () => {
         userId: userId,
         userName: response.data.firstName,
         lastMessage: "",
+        profileIcon: response.data.profileIcon,
       });
     } catch (error) {
       console.error("Failed to fetch user details:", error);
@@ -123,10 +127,6 @@ const Messaging: React.FC = () => {
     }
     fetchConversations();
     fetchAllUsers();
-
-    return () => {
-      // Clean up any ongoing requests or subscriptions here
-    };
   }, [location, fetchUserDetails, fetchConversations, fetchAllUsers]);
 
   useEffect(() => {
@@ -136,7 +136,9 @@ const Messaging: React.FC = () => {
   }, [selectedConversation, fetchMessages]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messageListRef.current) {
+      messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+    }
   }, [messages]);
 
   const handleSendMessage = async () => {
@@ -165,6 +167,11 @@ const Messaging: React.FC = () => {
     setSelectedConversation(userId);
     fetchUserDetails(userId);
     setNewConversationDialogOpen(false);
+    setTimeout(() => {
+      if (messageListRef.current) {
+        messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+      }
+    }, 100);
   };
 
   const handleLikeUser = async (userId: string) => {
@@ -173,7 +180,6 @@ const Messaging: React.FC = () => {
       await axios.post(`${process.env.REACT_APP_API_URL}/api/like/${userId}`, {
         likerId: currentUserId,
       });
-      // Update the UI to reflect the like
       setAllUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === userId ? { ...user, isLiked: true } : user
@@ -182,6 +188,10 @@ const Messaging: React.FC = () => {
     } catch (error) {
       console.error("Failed to like user:", error);
     }
+  };
+
+  const handleOpenProfile = (userId: string) => {
+    navigate(`/user-profile/${userId}`);
   };
 
   const formatDate = (timestamp: string) => {
@@ -195,12 +205,21 @@ const Messaging: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, height: "calc(100vh - 100px)" }}>
+    <Container
+      maxWidth="lg"
+      sx={{
+        mt: 4,
+        height: "calc(100vh - 100px)",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <Paper
         elevation={3}
         sx={{
-          height: "100%",
+          flexGrow: 1,
           display: "flex",
+          overflow: "hidden",
           bgcolor: theme.palette.background.paper,
         }}
       >
@@ -236,7 +255,19 @@ const Messaging: React.FC = () => {
                   onClick={() => setSelectedConversation(conversation.userId)}
                 >
                   <ListItemAvatar>
-                    <Avatar>{conversation.userName[0]}</Avatar>
+                    <Avatar
+                      src={
+                        conversation.profileIcon
+                          ? `${process.env.REACT_APP_API_URL}${conversation.profileIcon}`
+                          : undefined
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenProfile(conversation.userId);
+                      }}
+                    >
+                      {conversation.userName[0]}
+                    </Avatar>
                   </ListItemAvatar>
                   <ListItemText
                     primary={conversation.userName}
@@ -262,15 +293,32 @@ const Messaging: React.FC = () => {
                 sx={{
                   p: 2,
                   borderBottom: `1px solid ${theme.palette.divider}`,
+                  display: "flex",
+                  alignItems: "center",
+                  cursor: "pointer",
                 }}
+                onClick={() => handleOpenProfile(selectedConversation)}
               >
+                <Avatar
+                  src={
+                    selectedUser?.profileIcon
+                      ? `${process.env.REACT_APP_API_URL}${selectedUser.profileIcon}`
+                      : undefined
+                  }
+                  sx={{ mr: 2 }}
+                >
+                  {selectedUser?.userName?.[0]}
+                </Avatar>
                 <Typography variant="h6">
                   {selectedUser?.userName ||
                     conversations.find((c) => c.userId === selectedConversation)
                       ?.userName}
                 </Typography>
               </Box>
-              <Box sx={{ flexGrow: 1, overflowY: "auto", p: 2 }}>
+              <Box
+                ref={messageListRef}
+                sx={{ flexGrow: 1, overflowY: "auto", p: 2 }}
+              >
                 {messages.map((message, index) => (
                   <React.Fragment key={message.id}>
                     {index === 0 ||
@@ -298,8 +346,22 @@ const Messaging: React.FC = () => {
                           message.senderId === localStorage.getItem("userId")
                             ? "flex-end"
                             : "flex-start",
+                        alignItems: "flex-end",
                       }}
                     >
+                      {message.senderId !== localStorage.getItem("userId") && (
+                        <Avatar
+                          src={
+                            message.senderProfileIcon
+                              ? `${process.env.REACT_APP_API_URL}${message.senderProfileIcon}`
+                              : undefined
+                          }
+                          sx={{ mr: 1, mb: 1, cursor: "pointer" }}
+                          onClick={() => handleOpenProfile(message.senderId)}
+                        >
+                          {selectedUser?.userName?.[0]}
+                        </Avatar>
+                      )}
                       <Paper
                         elevation={1}
                         sx={{
@@ -331,6 +393,19 @@ const Messaging: React.FC = () => {
                           {formatDate(message.createdAt).split(" at ")[1]}
                         </Typography>
                       </Paper>
+                      {message.senderId === localStorage.getItem("userId") && (
+                        <Avatar
+                          src={
+                            message.senderProfileIcon
+                              ? `${process.env.REACT_APP_API_URL}${message.senderProfileIcon}`
+                              : undefined
+                          }
+                          sx={{ ml: 1, mb: 1, cursor: "pointer" }}
+                          onClick={() => handleOpenProfile(message.senderId)}
+                        >
+                          {selectedUser?.userName?.[0]}
+                        </Avatar>
+                      )}
                     </Box>
                   </React.Fragment>
                 ))}
@@ -392,7 +467,15 @@ const Messaging: React.FC = () => {
               <React.Fragment key={user.id}>
                 <ListItem>
                   <ListItemAvatar>
-                    <Avatar src={user.profileIcon}>{user.firstName[0]}</Avatar>
+                    <Avatar
+                      src={
+                        user.profileIcon
+                          ? `${process.env.REACT_APP_API_URL}${user.profileIcon}`
+                          : undefined
+                      }
+                    >
+                      {user.firstName[0]}
+                    </Avatar>
                   </ListItemAvatar>
                   <ListItemText primary={user.firstName} />
                   <IconButton

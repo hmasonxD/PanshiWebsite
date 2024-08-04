@@ -14,7 +14,7 @@ import {
 import { styled } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 interface UserData {
@@ -44,13 +44,22 @@ const UserProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { userId } = useParams<{ userId: string }>();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userId = localStorage.getItem("userId");
+        const currentUserId = localStorage.getItem("userId");
+        const profileUserId = userId || currentUserId;
+
+        if (!profileUserId) {
+          setError("No user ID provided");
+          setLoading(false);
+          return;
+        }
+
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/user-profile/${userId}`
+          `${process.env.REACT_APP_API_URL}/api/user-profile/${profileUserId}`
         );
         setUserData(response.data);
       } catch (error) {
@@ -61,7 +70,7 @@ const UserProfile: React.FC = () => {
       }
     };
     fetchUserData();
-  }, []);
+  }, [userId]);
 
   const calculateAge = (birthday: string) => {
     const ageDifMs = Date.now() - new Date(birthday).getTime();
@@ -116,6 +125,9 @@ const UserProfile: React.FC = () => {
     );
   }
 
+  const isCurrentUser =
+    userId === undefined || userId === localStorage.getItem("userId");
+
   return (
     <Container maxWidth="md">
       <Box display="flex" flexDirection="column" alignItems="center" my={4}>
@@ -128,13 +140,15 @@ const UserProfile: React.FC = () => {
         <Typography variant="subtitle1" gutterBottom>
           {userData.gender}, {calculateAge(userData.birthday)} years old
         </Typography>
-        <IconButton
-          color="primary"
-          aria-label="account settings"
-          onClick={() => navigate("/account-settings")}
-        >
-          <SettingsIcon fontSize="medium" />
-        </IconButton>
+        {isCurrentUser && (
+          <IconButton
+            color="primary"
+            aria-label="account settings"
+            onClick={() => navigate("/account-settings")}
+          >
+            <SettingsIcon fontSize="medium" />
+          </IconButton>
+        )}
       </Box>
 
       <Grid container spacing={4}>
@@ -158,7 +172,7 @@ const UserProfile: React.FC = () => {
                   <Card>
                     <img
                       src={getFullImageUrl(photo)}
-                      alt={`Photo ${index + 1}`} // eslint-disable-next-line
+                      alt={`Photo ${index + 1}`}
                       style={{
                         width: "100%",
                         height: "200px",
@@ -187,16 +201,18 @@ const UserProfile: React.FC = () => {
         </Grid>
       </Grid>
 
-      <Box mt={4} display="flex" justifyContent="center">
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<EditIcon />}
-          onClick={() => navigate("/account-settings")}
-        >
-          Edit Profile
-        </Button>
-      </Box>
+      {isCurrentUser && (
+        <Box mt={4} display="flex" justifyContent="center">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<EditIcon />}
+            onClick={() => navigate("/account-settings")}
+          >
+            Edit Profile
+          </Button>
+        </Box>
+      )}
     </Container>
   );
 };
