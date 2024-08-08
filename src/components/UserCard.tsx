@@ -7,7 +7,7 @@ import {
   Button,
   Box,
 } from "@mui/material";
-import { Favorite, FavoriteBorder, Chat } from "@mui/icons-material";
+import { Favorite, FavoriteBorder, Chat, Person } from "@mui/icons-material";
 
 interface User {
   id: string;
@@ -21,6 +21,7 @@ interface UserCardProps {
   user: User;
   onLike: () => void;
   onMessage: () => void;
+  onOpenProfile: () => void;
   isLiked: boolean;
 }
 
@@ -28,6 +29,7 @@ const UserCard: React.FC<UserCardProps> = ({
   user,
   onLike,
   onMessage,
+  onOpenProfile,
   isLiked,
 }) => {
   return (
@@ -44,6 +46,8 @@ const UserCard: React.FC<UserCardProps> = ({
         height="200"
         image={user.profilePicture}
         alt={user.firstName}
+        onClick={onOpenProfile}
+        sx={{ cursor: "pointer" }}
       />
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography gutterBottom variant="h5" component="div">
@@ -60,7 +64,7 @@ const UserCard: React.FC<UserCardProps> = ({
           startIcon={isLiked ? <Favorite /> : <FavoriteBorder />}
           onClick={onLike}
         >
-          {isLiked ? "Liked" : "Like"}
+          {isLiked ? "Unlike" : "Like"}
         </Button>
         <Button
           variant="outlined"
@@ -69,6 +73,14 @@ const UserCard: React.FC<UserCardProps> = ({
           onClick={onMessage}
         >
           Message
+        </Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<Person />}
+          onClick={onOpenProfile}
+        >
+          Profile
         </Button>
       </Box>
     </Card>

@@ -32,7 +32,7 @@ const Matches: React.FC = () => {
     const fetchUsers = async () => {
       try {
         const currentUserId = localStorage.getItem("userId");
-        const response = await axios.get(
+        const response = await axios.get<User[]>(
           `${process.env.REACT_APP_API_URL}/api/users?currentUserId=${currentUserId}`
         );
         setUsers(response.data);
@@ -50,21 +50,37 @@ const Matches: React.FC = () => {
   const handleLike = async (userId: string) => {
     try {
       const currentUserId = localStorage.getItem("userId");
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/like/${userId}`, {
-        likerId: currentUserId,
-      });
+      const user = users.find((u) => u.id === userId);
+      if (user?.isLiked) {
+        // Unlike
+        await axios.delete(
+          `${process.env.REACT_APP_API_URL}/api/like/${userId}?likerId=${currentUserId}`
+        );
+      } else {
+        // Like
+        await axios.post(
+          `${process.env.REACT_APP_API_URL}/api/like/${userId}`,
+          {
+            likerId: currentUserId,
+          }
+        );
+      }
       setUsers(
         users.map((user) =>
-          user.id === userId ? { ...user, isLiked: true } : user
+          user.id === userId ? { ...user, isLiked: !user.isLiked } : user
         )
       );
     } catch (error) {
-      console.error("Failed to like user:", error);
+      console.error("Failed to like/unlike user:", error);
     }
   };
 
   const handleMessage = (userId: string) => {
     navigate(`/messaging?userId=${userId}`);
+  };
+
+  const handleOpenProfile = (userId: string) => {
+    navigate(`/user-profile/${userId}`);
   };
 
   const handlePageChange = (
@@ -107,6 +123,7 @@ const Matches: React.FC = () => {
               }}
               onLike={() => handleLike(user.id)}
               onMessage={() => handleMessage(user.id)}
+              onOpenProfile={() => handleOpenProfile(user.id)}
               isLiked={user.isLiked}
             />
           </Grid>

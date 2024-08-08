@@ -300,6 +300,36 @@ app.post('/api/like/:userId', async (req, res) => {
   }
 });
 
+// Unlike a user
+app.delete('/api/like/:userId', async (req, res) => {
+  try {
+    const likerId = parseInt(req.query.likerId as string);
+    const likedId = parseInt(req.params.userId);
+    
+    const existingLike = await prisma.like.findFirst({
+      where: {
+        likerId,
+        likedId,
+      },
+    });
+
+    if (!existingLike) {
+      return res.status(404).json({ error: 'Like not found' });
+    }
+
+    await prisma.like.delete({
+      where: {
+        id: existingLike.id
+      },
+    });
+    
+    res.json({ message: 'User unliked successfully' });
+  } catch (error) {
+    console.error('Error unliking user:', error);
+    res.status(500).json({ error: 'Error unliking user' });
+  }
+});
+
 // Get likes for a user
 app.get('/api/likes/:userId', async (req, res) => {
   try {

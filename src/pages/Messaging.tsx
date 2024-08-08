@@ -19,7 +19,14 @@ import {
   DialogActions,
   useTheme,
 } from "@mui/material";
-import { Send, ArrowBack, Add, Favorite, Chat } from "@mui/icons-material";
+import {
+  Send,
+  ArrowBack,
+  Add,
+  Favorite,
+  FavoriteBorder,
+  Chat,
+} from "@mui/icons-material";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { format, parseISO } from "date-fns";
@@ -44,6 +51,7 @@ interface User {
   id: string;
   firstName: string;
   profileIcon?: string;
+  isLiked?: boolean;
 }
 
 const Messaging: React.FC = () => {
@@ -177,16 +185,31 @@ const Messaging: React.FC = () => {
   const handleLikeUser = async (userId: string) => {
     try {
       const currentUserId = localStorage.getItem("userId");
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/like/${userId}`, {
-        likerId: currentUserId,
-      });
+      const user = allUsers.find((u) => u.id === userId);
+      if (user?.isLiked) {
+        // Unlike
+        await axios.delete(
+          `${process.env.REACT_APP_API_URL}/api/like/${userId}`,
+          {
+            data: { likerId: currentUserId },
+          }
+        );
+      } else {
+        // Like
+        await axios.post(
+          `${process.env.REACT_APP_API_URL}/api/like/${userId}`,
+          {
+            likerId: currentUserId,
+          }
+        );
+      }
       setAllUsers((prevUsers) =>
         prevUsers.map((user) =>
-          user.id === userId ? { ...user, isLiked: true } : user
+          user.id === userId ? { ...user, isLiked: !user.isLiked } : user
         )
       );
     } catch (error) {
-      console.error("Failed to like user:", error);
+      console.error("Failed to like/unlike user:", error);
     }
   };
 
@@ -223,6 +246,7 @@ const Messaging: React.FC = () => {
           bgcolor: theme.palette.background.paper,
         }}
       >
+        {/* Left sidebar with conversations list */}
         <Box
           sx={{
             width: "30%",
@@ -247,38 +271,46 @@ const Messaging: React.FC = () => {
             </IconButton>
           </Box>
           <List sx={{ flexGrow: 1, overflowY: "auto" }}>
-            {conversations.map((conversation, index) => (
-              <React.Fragment key={conversation.userId}>
-                <ListItem
-                  button
-                  selected={selectedConversation === conversation.userId}
-                  onClick={() => setSelectedConversation(conversation.userId)}
-                >
-                  <ListItemAvatar>
-                    <Avatar
-                      src={
-                        conversation.profileIcon
-                          ? `${process.env.REACT_APP_API_URL}${conversation.profileIcon}`
-                          : undefined
-                      }
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenProfile(conversation.userId);
-                      }}
-                    >
-                      {conversation.userName[0]}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={conversation.userName}
-                    secondary={conversation.lastMessage}
-                  />
-                </ListItem>
-                {index < conversations.length - 1 && <Divider />}
-              </React.Fragment>
-            ))}
+            {conversations
+              .filter(
+                (conversation, index, self) =>
+                  index ===
+                  self.findIndex((t) => t.userId === conversation.userId)
+              )
+              .map((conversation, index, filteredConversations) => (
+                <React.Fragment key={conversation.userId}>
+                  <ListItem
+                    button
+                    selected={selectedConversation === conversation.userId}
+                    onClick={() => setSelectedConversation(conversation.userId)}
+                  >
+                    <ListItemAvatar>
+                      <Avatar
+                        src={
+                          conversation.profileIcon
+                            ? `${process.env.REACT_APP_API_URL}${conversation.profileIcon}`
+                            : undefined
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenProfile(conversation.userId);
+                        }}
+                      >
+                        {conversation.userName[0]}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={conversation.userName}
+                      secondary={conversation.lastMessage}
+                    />
+                  </ListItem>
+                  {index < filteredConversations.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
           </List>
         </Box>
+
+        {/* Main chat area */}
         <Box
           sx={{
             width: "70%",
@@ -289,6 +321,7 @@ const Messaging: React.FC = () => {
         >
           {selectedConversation ? (
             <>
+              {/* Conversation header */}
               <Box
                 sx={{
                   p: 2,
@@ -303,11 +336,21 @@ const Messaging: React.FC = () => {
                   src={
                     selectedUser?.profileIcon
                       ? `${process.env.REACT_APP_API_URL}${selectedUser.profileIcon}`
+                      : conversations.find(
+                          (c) => c.userId === selectedConversation
+                        )?.profileIcon
+                      ? `${process.env.REACT_APP_API_URL}${
+                          conversations.find(
+                            (c) => c.userId === selectedConversation
+                          )?.profileIcon
+                        }`
                       : undefined
                   }
-                  sx={{ mr: 2 }}
+                  sx={{ mr: 2, width: 48, height: 48 }}
                 >
-                  {selectedUser?.userName?.[0]}
+                  {selectedUser?.userName?.[0] ||
+                    conversations.find((c) => c.userId === selectedConversation)
+                      ?.userName?.[0]}
                 </Avatar>
                 <Typography variant="h6">
                   {selectedUser?.userName ||
@@ -315,12 +358,15 @@ const Messaging: React.FC = () => {
                       ?.userName}
                 </Typography>
               </Box>
+
+              {/* Messages area */}
               <Box
                 ref={messageListRef}
                 sx={{ flexGrow: 1, overflowY: "auto", p: 2 }}
               >
                 {messages.map((message, index) => (
                   <React.Fragment key={message.id}>
+                    {/* Date divider */}
                     {index === 0 ||
                     formatDate(message.createdAt).split(" at ")[0] !==
                       formatDate(messages[index - 1].createdAt).split(
@@ -338,6 +384,8 @@ const Messaging: React.FC = () => {
                         {formatDate(message.createdAt).split(" at ")[0]}
                       </Typography>
                     ) : null}
+
+                    {/* Message bubble */}
                     <Box
                       sx={{
                         mb: 2,
@@ -356,7 +404,7 @@ const Messaging: React.FC = () => {
                               ? `${process.env.REACT_APP_API_URL}${message.senderProfileIcon}`
                               : undefined
                           }
-                          sx={{ mr: 1, mb: 1, cursor: "pointer" }}
+                          sx={{ mr: 1, mb: 1, width: 32, height: 32 }}
                           onClick={() => handleOpenProfile(message.senderId)}
                         >
                           {selectedUser?.userName?.[0]}
@@ -375,6 +423,10 @@ const Messaging: React.FC = () => {
                             message.senderId === localStorage.getItem("userId")
                               ? theme.palette.primary.contrastText
                               : theme.palette.text.primary,
+                          borderRadius:
+                            message.senderId === localStorage.getItem("userId")
+                              ? "20px 20px 0 20px"
+                              : "20px 20px 20px 0",
                         }}
                       >
                         <Typography variant="body1">
@@ -411,6 +463,8 @@ const Messaging: React.FC = () => {
                 ))}
                 <div ref={messagesEndRef} />
               </Box>
+
+              {/* Message input area */}
               <Box
                 sx={{
                   p: 2,
@@ -454,6 +508,8 @@ const Messaging: React.FC = () => {
           )}
         </Box>
       </Paper>
+
+      {/* New conversation dialog */}
       <Dialog
         open={newConversationDialogOpen}
         onClose={() => setNewConversationDialogOpen(false)}
@@ -482,7 +538,7 @@ const Messaging: React.FC = () => {
                     onClick={() => handleLikeUser(user.id)}
                     color="primary"
                   >
-                    <Favorite />
+                    {user.isLiked ? <Favorite /> : <FavoriteBorder />}
                   </IconButton>
                   <IconButton
                     onClick={() => handleNewConversation(user.id)}
